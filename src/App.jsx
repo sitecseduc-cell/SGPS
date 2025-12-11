@@ -7,33 +7,25 @@ import {
   Map, Bell, LogOut, Upload, Zap,
   ChevronRight, Mail, Phone, Plus, Trash2, Edit,
   Settings, BookOpen, Shield, Layers, Calendar,
-  TrendingUp, Activity, MapPin, X, Save, Eye, FileCheck
+  TrendingUp, Activity, MapPin, X, Save, Eye, FileCheck,
+  BarChart3
 } from 'lucide-react';
 
 // --- MOCK DATA ---
 
-const DASHBOARD_DATA = {
-  kpis: {
-    processos_ativos: 14,
-    candidatos_total: 28450,
-    vagas_preenchidas: "85%",
-    alertas_criticos: 3
-  },
-  heatmap_dres: [
-    { nome: 'DRE Belém', candidatos: 12500, status: 'crítico' },
-    { nome: 'DRE Ananindeua', candidatos: 8200, status: 'alto' },
-    { nome: 'DRE Castanhal', candidatos: 4500, status: 'medio' },
-    { nome: 'DRE Marabá', candidatos: 3100, status: 'medio' },
-  ],
-  analises_criticas: [
-    { id: 1, processo: 'PSS 07/2025', problema: 'Atraso na Análise Documental', setor: 'Comissão Avaliadora', tempo: '2 dias' },
-    { id: 2, processo: 'PSS Estagiários', problema: 'Alto índice de recursos', setor: 'Jurídico', tempo: '5 horas' },
-  ]
+const KPIS = {
+  activeProcesses: 14,
+  totalCandidates: 28450,
+  vacanciesFilled: "85%",
+  delayedProcesses: 2
 };
 
 const PROCESSOS_MOCK = [
   { id: 1, nome: 'PSS 07/2025 - PROFESSOR NIVEL SUPERIOR', periodo: '17/11/2025 - 14/12/2025', fase_atual: 'Análise Documental', progresso: 45, permitir_alteracao: false },
   { id: 2, nome: 'PSS Estagiários 06/2025', periodo: '08/09/2025 - 10/09/2025', fase_atual: 'Homologado', progresso: 100, permitir_alteracao: false },
+  { id: 3, nome: 'PSS Estagiários-Bolsistas - ARCON 01/2025', periodo: '18/09/2025 - 23/09/2025', fase_atual: 'Recursos', progresso: 80, permitir_alteracao: false },
+  { id: 4, nome: 'PSS ESTAGIÁRIOS - 05/2025', periodo: '11/08/2025 - 17/08/2025', fase_atual: 'Encerrado', progresso: 100, permitir_alteracao: false },
+  { id: 5, nome: 'PSS SIMPLIFICADO 04/2025 - SECTET', periodo: '28/05/2025 - 08/06/2025', fase_atual: 'Entrevistas', progresso: 60, permitir_alteracao: false }
 ];
 
 const CANDIDATOS_MOCK = [
@@ -93,7 +85,7 @@ const CANDIDATOS_MOCK = [
   },
 ];
 
-// --- COMPONENTES VISUAIS ---
+// --- COMPONENTES VISUAIS DASHBOARD ---
 
 const StatCard = ({ title, value, icon: Icon, color, subtext, alert }) => (
   <div className={`bg-white p-6 rounded-2xl shadow-sm border ${alert ? 'border-red-200 bg-red-50' : 'border-slate-100'} hover:shadow-md transition-all`}>
@@ -115,30 +107,82 @@ const StatCard = ({ title, value, icon: Icon, color, subtext, alert }) => (
   </div>
 );
 
-// --- VISÃO DASHBOARD ---
-const DashboardView = () => (
-  <div className="space-y-6 animate-fadeIn pb-10">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard title="Processos Ativos" value={DASHBOARD_DATA.kpis.processos_ativos} icon={Layers} color="bg-blue-100 text-blue-600" />
-      <StatCard title="Total de Candidatos" value={DASHBOARD_DATA.kpis.candidatos_total.toLocaleString()} icon={Users} color="bg-indigo-100 text-indigo-600" />
-      <StatCard title="Vagas Preenchidas" value={DASHBOARD_DATA.kpis.vagas_preenchidas} icon={CheckCircle} color="bg-emerald-100 text-emerald-600" />
-      <StatCard title="Pontos de Atenção" value={DASHBOARD_DATA.kpis.alertas_criticos} icon={AlertTriangle} color="bg-red-100 text-red-600" alert={true} />
-    </div>
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-      <h3 className="text-lg font-bold text-slate-800 mb-4">Mapa de Calor (DREs)</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {DASHBOARD_DATA.heatmap_dres.map((dre, idx) => (
-          <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-            <span className="text-xs font-bold uppercase text-slate-500">{dre.nome}</span>
-            <span className="block text-xl font-bold text-slate-800 mt-1">{dre.candidatos.toLocaleString()}</span>
+const FunnelChart = () => (
+  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
+    <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center"><BarChart3 size={18} className="mr-2 text-slate-500"/> Funil de Seleção Global</h3>
+    <div className="space-y-4">
+      {[
+        { label: 'Inscritos', val: '100%', count: 28450, color: 'bg-blue-600' },
+        { label: 'Habilitados', val: '80%', count: 22760, color: 'bg-blue-500' },
+        { label: 'Títulos Validados', val: '45%', count: 12800, color: 'bg-indigo-500' },
+        { label: 'Classificados', val: '20%', count: 5690, color: 'bg-purple-500' },
+        { label: 'Convocados', val: '5%', count: 1422, color: 'bg-emerald-500' }
+      ].map((step, idx) => (
+        <div key={idx} className="relative group cursor-default">
+          <div className="flex justify-between text-xs mb-1.5 font-semibold text-slate-600">
+            <span>{step.label}</span>
+            <span>{step.count.toLocaleString()}</span>
           </div>
-        ))}
+          <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+            <div className={`h-full ${step.color} rounded-full transition-all duration-1000 group-hover:opacity-80`} style={{ width: step.val }}></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const HeatMap = () => (
+  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
+    <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center"><Map size={18} className="mr-2 text-slate-500"/> Mapa de Calor (Demandas Críticas)</h3>
+    <div className="grid grid-cols-2 gap-4">
+      {/* Mock visual do mapa com cartões coloridos */}
+      <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex flex-col justify-center items-center text-center group hover:bg-red-100 transition-colors">
+        <span className="text-2xl font-black text-red-600 mb-1">Belém</span>
+        <span className="text-xs font-bold text-red-400 uppercase tracking-wide">Demanda Crítica</span>
+        <span className="text-[10px] text-red-300 mt-1">12.500 Inscritos</span>
+      </div>
+      <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 flex flex-col justify-center items-center text-center group hover:bg-orange-100 transition-colors">
+        <span className="text-2xl font-black text-orange-600 mb-1">Ananindeua</span>
+        <span className="text-xs font-bold text-orange-400 uppercase tracking-wide">Demanda Alta</span>
+        <span className="text-[10px] text-orange-300 mt-1">8.200 Inscritos</span>
+      </div>
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col justify-center items-center text-center group hover:bg-blue-100 transition-colors">
+        <span className="text-2xl font-black text-blue-600 mb-1">Marabá</span>
+        <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">Média Demanda</span>
+        <span className="text-[10px] text-blue-300 mt-1">3.100 Inscritos</span>
+      </div>
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-center items-center text-center group hover:bg-slate-100 transition-colors">
+        <span className="text-2xl font-black text-slate-600 mb-1">Santarém</span>
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Estável</span>
+        <span className="text-[10px] text-slate-300 mt-1">2.800 Inscritos</span>
       </div>
     </div>
   </div>
 );
 
-// --- VISÃO GESTÃO DE PROCESSOS ---
+// --- VISÃO DASHBOARD RESTAURADA ---
+const DashboardView = () => (
+  <div className="space-y-6 animate-fadeIn pb-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StatCard title="Processos Ativos" value={KPIS.activeProcesses} icon={GitCommit} color="bg-blue-100 text-blue-600" />
+      <StatCard title="Candidatos Totais" value={KPIS.totalCandidates.toLocaleString()} icon={Users} color="bg-purple-100 text-purple-600" subtext="+12% essa semana" />
+      <StatCard title="Vagas Preenchidas" value={KPIS.vacanciesFilled} icon={CheckCircle} color="bg-emerald-100 text-emerald-600" />
+      <StatCard title="Atrasos Críticos" value={KPIS.delayedProcesses} icon={AlertTriangle} color="bg-red-100 text-red-600" alert={true} subtext="Requer atenção imediata" />
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-96">
+      <div className="lg:col-span-1 h-full">
+        <FunnelChart />
+      </div>
+      <div className="lg:col-span-2 h-full">
+        <HeatMap />
+      </div>
+    </div>
+  </div>
+);
+
+// --- VISÃO GESTÃO DE PROCESSOS (Tabela) ---
 const ProcessManagementView = () => (
   <div className="space-y-6 animate-fadeIn">
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -156,6 +200,7 @@ const ProcessManagementView = () => (
           <tr>
             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Nome do Processo</th>
             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Fase Atual</th>
+            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Progresso</th>
             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Ações</th>
           </tr>
         </thead>
@@ -163,7 +208,12 @@ const ProcessManagementView = () => (
           {PROCESSOS_MOCK.map((proc) => (
             <tr key={proc.id} className="hover:bg-slate-50 transition-colors">
               <td className="px-6 py-5 font-medium text-slate-700">{proc.nome}</td>
-              <td className="px-6 py-5 text-sm text-blue-600 font-bold">{proc.fase_atual}</td>
+              <td className="px-6 py-5 text-sm font-bold text-blue-600">{proc.fase_atual}</td>
+              <td className="px-6 py-5 align-middle">
+                <div className="w-full max-w-[100px] mx-auto bg-slate-100 rounded-full h-2">
+                  <div className="bg-emerald-500 h-2 rounded-full" style={{width: `${proc.progresso}%`}}></div>
+                </div>
+              </td>
               <td className="px-6 py-5 text-right">
                 <button className="p-2 text-slate-400 hover:text-blue-600"><Edit size={18}/></button>
               </td>
@@ -195,16 +245,13 @@ const CandidateManagementView = () => {
   };
 
   const handleSave = () => {
-    // Aqui viria a lógica de salvar no backend (Supabase/API)
     alert(`Dados de ${editData.nome} salvos com sucesso!`);
     setIsEditing(false);
-    // Atualizar estado local se necessário
   };
 
-  // Sub-componente: Detalhes do Candidato (360)
   if (selectedCandidate) {
     return (
-      <div className="animate-fadeIn space-y-6">
+      <div className="animate-fadeIn space-y-6 pb-10">
         {/* Header do Perfil */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center space-x-4">
@@ -230,7 +277,7 @@ const CandidateManagementView = () => {
               <>
                 <button onClick={() => setIsEditing(false)} className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-medium hover:bg-slate-50">Cancelar</button>
                 <button onClick={handleSave} className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 flex items-center shadow-lg shadow-emerald-500/20">
-                  <Save size={18} className="mr-2"/> Salvar Alterações
+                  <Save size={18} className="mr-2"/> Salvar
                 </button>
               </>
             ) : (
@@ -242,7 +289,6 @@ const CandidateManagementView = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna 1: Dados Pessoais e Contato (Editável) */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 lg:col-span-2">
             <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
               <User size={20} className="mr-2 text-blue-500"/> Dados Cadastrais
@@ -266,11 +312,11 @@ const CandidateManagementView = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 mb-1">Perfil de Inscrição</label>
-                <div className="p-2 text-slate-800">{selectedCandidate.perfil}</div>
+                <div className="p-2 text-slate-800 font-medium bg-slate-50 rounded-lg">{selectedCandidate.perfil}</div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 mb-1">Data Inscrição</label>
-                <div className="p-2 text-slate-800">{selectedCandidate.data_inscricao}</div>
+                <div className="p-2 text-slate-800 font-medium bg-slate-50 rounded-lg">{selectedCandidate.data_inscricao}</div>
               </div>
             </div>
 
@@ -297,9 +343,7 @@ const CandidateManagementView = () => {
             </div>
           </div>
 
-          {/* Coluna 2: Histórico e Documentos (Lateral) */}
           <div className="space-y-6">
-            {/* Documentos */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
               <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
                 <FileText size={20} className="mr-2 text-orange-500"/> Documentos
@@ -314,7 +358,6 @@ const CandidateManagementView = () => {
               </ul>
             </div>
 
-            {/* Linha do Tempo */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
               <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
                 <Clock size={20} className="mr-2 text-slate-500"/> Linha do Tempo
@@ -335,9 +378,8 @@ const CandidateManagementView = () => {
     );
   }
 
-  // Visão Lista (Tabela de Busca)
   return (
-    <div className="animate-fadeIn space-y-6">
+    <div className="animate-fadeIn space-y-6 pb-10">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
           <div>
@@ -413,7 +455,7 @@ const CandidateManagementView = () => {
 // --- APP PRINCIPAL ---
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('inscritos'); // Aba padrão alterada para 'inscritos' para teste imediato
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   const SidebarItem = ({ icon: Icon, label, id }) => (
     <button 
@@ -460,6 +502,7 @@ export default function App() {
             <SidebarItem icon={Users} label="Gestão de Inscritos" id="inscritos" />
             <SidebarItem icon={Search} label="Pesquisar Candidatos" id="pesquisa" />
             <SidebarItem icon={User} label="Visualizar Candidato" id="visualizar" />
+            <SidebarItem icon={Users} label="Quantidade de Inscritos" id="qtd" />
           </SidebarGroup>
 
           <SidebarGroup title="Análise & Avaliação">
