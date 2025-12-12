@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, ChevronRight, Mail, Phone, Save, Edit, 
   User, MapPin, FileText, Clock, FileCheck, Eye,
-  Shield, CheckCircle, X, AlertTriangle, Loader // Usando Loader padrão para evitar erro
+  Shield, CheckCircle, X, AlertTriangle, Loader, Plus // <--- Import Plus
 } from 'lucide-react';
 import CandidateTable from '../components/CandidateTable';
+import NewCandidateModal from '../components/NewCandidateModal'; // <--- Import Modal Novo
 import { TableSkeleton, Spinner } from '../components/ui/Loading';
 import { CANDIDATOS_MOCK } from '../data/mockData';
 
-// Hook personalizado para atrasar a busca (Debounce)
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -19,11 +19,14 @@ function useDebounce(value, delay) {
 }
 
 export default function Inscritos() {
+  // Estado local para armazenar os candidatos (para permitir adição)
+  const [allCandidates, setAllCandidates] = useState(CANDIDATOS_MOCK);
+  
   const [inputValue, setInputValue] = useState('');
-  const searchTerm = useDebounce(inputValue, 500); // 500ms de espera
+  const searchTerm = useDebounce(inputValue, 500);
   
   const [page, setPage] = useState(1);
-  const pageSize = 10; // Exibe 10 por página
+  const pageSize = 10;
   const [filteredData, setFilteredData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   
@@ -32,17 +35,18 @@ export default function Inscritos() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Estado do Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Efeito que simula a busca no servidor com delay
+  // Efeito de Busca e Paginação
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      
-      // Simula delay de rede (Skeleton aparece aqui)
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      // 1. Filtragem
-      const allFiltered = CANDIDATOS_MOCK.filter(c => 
+      // Filtra com base no estado local 'allCandidates' em vez do MOCK direto
+      const allFiltered = allCandidates.filter(c => 
         c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
         c.cpf.includes(searchTerm) ||
         c.processo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -50,7 +54,6 @@ export default function Inscritos() {
 
       setTotalCount(allFiltered.length);
 
-      // 2. Paginação
       const start = (page - 1) * pageSize;
       const end = start + pageSize;
       setFilteredData(allFiltered.slice(start, end));
@@ -59,12 +62,29 @@ export default function Inscritos() {
     };
 
     fetchData();
-  }, [searchTerm, page]);
+  }, [searchTerm, page, allCandidates]); // Atualiza se a lista de candidatos mudar
 
-  // Volta para a página 1 se mudar a busca
   useEffect(() => {
     setPage(1);
   }, [searchTerm]);
+
+  // Função para adicionar novo candidato (CRUD: Create)
+  const handleAddCandidate = (newCandidate) => {
+    const candidatoFormatado = {
+      id: allCandidates.length + 100,
+      ...newCandidate,
+      processo: 'Novo Processo Manual', // Valor padrão
+      localidade: 'A Definir',
+      status: 'Em Análise',
+      perfil: 'Manual',
+      data_inscricao: new Date().toLocaleDateString('pt-BR'),
+      documentos: [],
+      historico: [{ data: new Date().toLocaleDateString('pt-BR'), evento: 'Cadastro Manual', usuario: 'Admin' }]
+    };
+
+    setAllCandidates([candidatoFormatado, ...allCandidates]); // Adiciona ao topo
+    alert('Candidato cadastrado com sucesso!');
+  };
 
   const handleSelectCandidate = (candidate) => {
     setSelectedCandidate(candidate);
@@ -76,6 +96,10 @@ export default function Inscritos() {
     setIsSaving(true);
     setTimeout(() => {
       alert(`Dados de ${editData.nome} salvos!`);
+      
+      // Atualiza na lista principal também
+      setAllCandidates(prev => prev.map(c => c.id === editData.id ? editData : c));
+      
       setSelectedCandidate(editData);
       setIsSaving(false);
       setIsEditing(false);
@@ -84,15 +108,21 @@ export default function Inscritos() {
 
   const handleStatusChange = (newStatus) => {
     if(window.confirm(`Mudar status para: ${newStatus}?`)) {
-      setSelectedCandidate({ ...selectedCandidate, status: newStatus });
+      const updated = { ...selectedCandidate, status: newStatus };
+      setSelectedCandidate(updated);
+      // Atualiza na lista principal
+      setAllCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
     }
   };
 
-  // Visão Detalhada
+  // --- RENDERIZAÇÃO --- //
+
   if (selectedCandidate) {
+    // ... (Mantém o código da visualização detalhada igual ao anterior)
+    // Vou resumir para não estourar o limite, copie o bloco "if (selectedCandidate)" do código anterior
+    // Mas lembre-se de que a lógica é a mesma.
     return (
       <div className="animate-fadeIn space-y-6 pb-20">
-        {/* Cabeçalho */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-4">
             <button onClick={() => setSelectedCandidate(null)} className="p-2.5 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200">
@@ -125,7 +155,6 @@ export default function Inscritos() {
           </div>
         </div>
 
-        {/* Detalhes */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
@@ -141,8 +170,6 @@ export default function Inscritos() {
                 </div>
               </div>
             </div>
-            
-            {/* Ações Rápidas */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
               <h3 className="text-lg font-bold text-slate-800 mb-4">Ações de Gestão</h3>
               <div className="flex gap-3">
@@ -151,17 +178,16 @@ export default function Inscritos() {
               </div>
             </div>
           </div>
-
           <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
               <h3 className="text-lg font-bold text-slate-800 mb-4">Documentos</h3>
               <ul className="space-y-2">
-                {selectedCandidate.documentos?.map((doc, i) => (
+                {selectedCandidate.documentos?.length > 0 ? selectedCandidate.documentos.map((doc, i) => (
                   <li key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg text-sm text-slate-700 hover:bg-blue-50 cursor-pointer">
                     <span className="flex items-center"><FileCheck size={16} className="mr-2 text-slate-400"/> {doc}</span>
                     <Eye size={16} className="text-slate-300"/>
                   </li>
-                ))}
+                )) : <p className="text-sm text-slate-400 italic">Nenhum documento anexado.</p>}
               </ul>
             </div>
           </div>
@@ -170,7 +196,7 @@ export default function Inscritos() {
     );
   }
 
-  // Visão da Tabela
+  // Visão da Lista
   return (
     <div className="animate-fadeIn space-y-6 pb-10">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[calc(100vh-140px)]">
@@ -182,17 +208,28 @@ export default function Inscritos() {
               Gerenciando <strong className="text-slate-800">{totalCount}</strong> candidatos
             </p>
           </div>
-          <div className="relative w-full md:w-96">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
-              {loading && inputValue !== searchTerm ? <Loader size={20} className="animate-spin text-blue-500"/> : <Search size={20} />}
+          
+          <div className="flex gap-3 w-full md:w-auto">
+            <div className="relative w-full md:w-96">
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                {loading && inputValue !== searchTerm ? <Loader size={20} className="animate-spin text-blue-500"/> : <Search size={20} />}
+              </div>
+              <input 
+                type="text" 
+                placeholder="Buscar por Nome, CPF ou Processo..." 
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+              />
             </div>
-            <input 
-              type="text" 
-              placeholder="Buscar..." 
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-            />
+            
+            {/* BOTÃO ADICIONAR (NOVO) */}
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all"
+            >
+              <Plus size={20} className="mr-2 hidden sm:block"/> <span className="whitespace-nowrap">Novo Candidato</span>
+            </button>
           </div>
         </div>
 
@@ -211,6 +248,13 @@ export default function Inscritos() {
           )}
         </div>
       </div>
+
+      {/* RENDERIZA O MODAL AQUI */}
+      <NewCandidateModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleAddCandidate}
+      />
     </div>
   );
 }
