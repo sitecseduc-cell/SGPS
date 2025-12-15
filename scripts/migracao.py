@@ -1,86 +1,158 @@
+import os
 import pandas as pd
 from supabase import create_client, Client
-import math
+from dotenv import load_dotenv
 
-# --- CONFIGURAÇÃO ---
-URL = "https://qtabcmusmorupvpkptif.supabase.co"
-KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0YWJjbXVzbW9ydXB2cGtwdGlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDkwMDIsImV4cCI6MjA4MDg4NTAwMn0.8dh6YD6rirR8mHA7ffdKmYqwzqHCypn2XAWkBQS5vf8" # Cuidado, não exponha isso no GitHub
+# --- CONFIGURAÇÃO INICIAL ---
+# Carrega as variáveis do arquivo .env
+load_dotenv()
+
+URL = os.getenv("SUPABASE_URL")
+KEY = os.getenv("SUPABASE_KEY")
+
+if not URL or not KEY:
+    raise ValueError("❌ Erro: SUPABASE_URL e SUPABASE_KEY precisam estar no arquivo .env")
+
+# Inicializa o cliente Supabase
 supabase: Client = create_client(URL, KEY)
 
-# ID do Processo (Crie um manualmente no banco primeiro e cole o ID aqui)
-PROCESSO_ID = "COLE_O_UUID_AQUI" 
-
 def limpar_texto(texto):
-    if pd.isna(texto) or texto == "":
+    """Remove espaços extras e converte para maiúsculas. Retorna None se vazio."""
+    if pd.isna(texto) or str(texto).strip() == "":
         return None
     return str(texto).strip().upper()
 
-def migrar_controle_vagas():
-    print("Iniciando migração de VAGAS...")
-    # Carregando CSV (Ajuste o nome do arquivo se precisar)
+def get_or_create_processo(nome_processo):
+    """
+    Busca um processo pelo nome. Se não existir, cria um novo.
+    Retorna o ID do processo.
+    """
+    print(f"🔍 Verificando processo: '{nome_processo}'...")
+    
+    # 1. Tenta buscar
     try:
-        df = pd.read_csv('CONTROLE NECESSIDADES ANALISTAS POR SUBSTITUIÇÃO - 02-09.xlsx - CONTROLE DE VAGAS.csv')
-    except FileNotFoundError:
-        print("Erro: Arquivo 'CONTROLE NECESSIDADES ANALISTAS POR SUBSTITUIÇÃO - 02-09.xlsx - CONTROLE DE VAGAS.csv' não encontrado.")
+        response = supabase.table('processos').select('id').eq('nome', nome_processo).execute()
+        if response.data:
+            print(f"✅ Processo encontrado. ID: {response.data[0]['id']}")
+            return response.data[0]['id']
+        
+        # 2. Se não existir, cria
+        print("⚡ Processo não encontrado. Criando novo...")
+        novo_processo = {
+            "nome": nome_processo,
+            "status": "Planejamento",
+            "descricao": "Importado via script de migração"
+        }
+        response = supabase.table('processos').insert(novo_processo).select().execute()
+        
+        if response.data:
+            print(f"✅ Processo criado com sucesso. ID: {response.data[0]['id']}")
+            return response.data[0]['id']
+            
+    except Exception as e:
+        print(f"❌ Erro ao gerenciar processo: {e}")
+        return None
+
+def migrar_vagas(processo_id, arquivo_csv):
+    print(f"\n📂 Iniciando migração de VAGAS para o Processo ID {processo_id}...")
+    
+    if not os.path.exists(arquivo_csv):
+        print(f"❌ Arquivo não encontrado: {arquivo_csv}")
         return
 
-    vagas_para_inserir = []
-    
-    for index, row in df.iterrows():
-        # Mapeando colunas do Excel para o Banco
-        vaga = {
-            "processo_id": PROCESSO_ID,
-            "municipio": limpar_texto(row.get('MUNICIPIO')),
-            "dre": limpar_texto(row.get('DRE')),
-            "cargo": limpar_texto(row.get('CARGO/FUNÇÃO') or row.get('CARGO')),
-            "escola_lotacao": limpar_texto(row.get('LOTAÇÃO') or row.get('ÚLTIMA LOTAÇÃO?')),
-            "status": 'OCUPADA' if limpar_texto(row.get('STATUS')) == 'ATIVO' else 'ABERTA',
-            "data_vacancia": row.get('VACANCIA') if pd.notna(row.get('VACANCIA')) else None,
-            "observacao": limpar_texto(row.get('OBSERVAÇÃO'))
-        }
+    try:
+        df = pd.read_csv(arquivo_csv)
+        vagas_para_inserir = []
         
-        # Filtro básico para não inserir linhas vazias
-        if vaga['cargo']:
+        for _, row in df.iterrows():
+            # Mapeamento e limpeza
+            municipio = limpar_texto(row.get('MUNICIPIO'))
+            cargo = limpar_texto(row.get('CARGO') or row.get('CARGO/FUNÇÃO'))
+            
+            # Pula linhas sem dados essenciais
+            if not municipio or not cargo:
+                continue
+
+            vaga = {
+                "processo_id": processo_id,
+                "municipio": municipio,
+                "dre": limpar_texto(row.get('DRE')),
+                "cargo": cargo,
+                "escola_lotacao": limpar_texto(row.get('LOTAÇÃO') or row.get('ÚLTIMA LOTAÇÃO?')),
+                "status": 'OCUPADA' if limpar_texto(row.get('STATUS')) == 'ATIVO' else 'ABERTA',
+                "observacao": limpar_texto(row.get('OBSERVAÇÃO'))
+            }
             vagas_para_inserir.append(vaga)
 
-    # Inserção em lotes (Batch insert) para ser rápido
-    if vagas_para_inserir:
-        try:
-            data, count = supabase.table('vagas').insert(vagas_para_inserir).execute()
-            print(f"Sucesso! {len(vagas_para_inserir)} vagas inseridas.")
-        except Exception as e:
-            print(f"Erro ao inserir vagas: {e}")
+        # Inserção em lotes (Batch) para evitar timeout
+        batch_size = 100
+        for i in range(0, len(vagas_para_inserir), batch_size):
+            batch = vagas_para_inserir[i:i + batch_size]
+            supabase.table('vagas').insert(batch).execute()
+            print(f"   ↳ Inserido lote {i} a {i + len(batch)}...")
 
-def migrar_contratos_assinados():
-    print("Iniciando migração de CANDIDATOS CONTRATADOS...")
-    try:
-        df = pd.read_csv('CONTROLE NECESSIDADES ANALISTAS POR SUBSTITUIÇÃO - 02-09.xlsx - CONTRATOS ASSINADOS ATÉ 14-10-2.csv')
-    except FileNotFoundError:
-        print("Erro: Arquivo 'CONTROLE NECESSIDADES ANALISTAS POR SUBSTITUIÇÃO - 02-09.xlsx - CONTRATOS ASSINADOS ATÉ 14-10-2.csv' não encontrado.")
+        print(f"✅ Sucesso! Total de {len(vagas_para_inserir)} vagas migradas.")
+
+    except Exception as e:
+        print(f"❌ Erro crítico na migração de vagas: {e}")
+
+def migrar_candidatos(processo_id, arquivo_csv):
+    print(f"\n📂 Iniciando migração de CANDIDATOS para o Processo ID {processo_id}...")
+    
+    if not os.path.exists(arquivo_csv):
+        print(f"❌ Arquivo não encontrado: {arquivo_csv}")
         return
 
-    candidatos_para_inserir = []
+    try:
+        df = pd.read_csv(arquivo_csv)
+        candidatos_para_inserir = []
 
-    for index, row in df.iterrows():
-        candidato = {
-            "processo_id": PROCESSO_ID,
-            "nome_completo": limpar_texto(row.get('CANDIDATO')),
-            "cpf": limpar_texto(row.get('CPF')), # Vai vir com asteriscos, paciência por enquanto
-            "municipio_inscricao": limpar_texto(row.get('MUNICIPIO')),
-            "cargo_inscricao": limpar_texto(row.get('CARGO')),
-            "status_geral": 'CONTRATADO'
-        }
+        for _, row in df.iterrows():
+            nome = limpar_texto(row.get('CANDIDATO') or row.get('NOME'))
+            cpf = limpar_texto(row.get('CPF'))
+            
+            if not nome: 
+                continue
 
-        if candidato['nome_completo']:
-             candidatos_para_inserir.append(candidato)
-    
-    if candidatos_para_inserir:
-        try:
-            data, count = supabase.table('candidatos').insert(candidatos_para_inserir).execute()
-            print(f"Sucesso! {len(candidatos_para_inserir)} candidatos inseridos.")
-        except Exception as e:
-            print(f"Erro ao inserir candidatos: {e}")
+            candidato = {
+                "processo_id": processo_id,
+                "nome": nome,
+                "cpf": cpf if cpf else "N/A", # Evita erro de constraint se não tiver CPF
+                "municipio_inscricao": limpar_texto(row.get('MUNICIPIO')),
+                "cargo_pretendido": limpar_texto(row.get('CARGO')),
+                "status": 'Classificado', # Assumindo padrão para importação
+                "email": limpar_texto(row.get('EMAIL')),
+                "telefone": limpar_texto(row.get('TELEFONE'))
+            }
+            candidatos_para_inserir.append(candidato)
+        
+        # Inserção em lotes
+        batch_size = 100
+        for i in range(0, len(candidatos_para_inserir), batch_size):
+            batch = candidatos_para_inserir[i:i + batch_size]
+            try:
+                supabase.table('candidatos').insert(batch).execute()
+                print(f"   ↳ Inserido lote {i} a {i + len(batch)}...")
+            except Exception as e:
+                print(f"   ⚠️ Erro no lote {i}: {e}")
+
+        print(f"✅ Sucesso! Total de {len(candidatos_para_inserir)} candidatos migrados.")
+
+    except Exception as e:
+        print(f"❌ Erro crítico na migração de candidatos: {e}")
 
 # --- EXECUÇÃO ---
-# migrar_controle_vagas()
-# migrar_contratos_assinados()
+if __name__ == "__main__":
+    # 1. Defina o nome do Processo que será criado/buscado
+    NOME_DO_PROCESSO = "PSS 01/2025 - PROCESSO UNIFICADO"
+    
+    # 2. Obtém o ID
+    id_processo = get_or_create_processo(NOME_DO_PROCESSO)
+    
+    if id_processo:
+        # 3. Roda as migrações (ajuste os nomes dos arquivos CSV conforme necessário)
+        # migrar_vagas(id_processo, 'dados_vagas.csv')
+        # migrar_candidatos(id_processo, 'dados_candidatos.csv')
+        pass
+    else:
+        print("❌ Não foi possível obter um ID de processo válido. Abortando.")

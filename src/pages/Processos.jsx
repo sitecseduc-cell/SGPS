@@ -1,33 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, FileText, Calendar, Layers, Trash2 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 import { PROCESSOS_MOCK } from '../data/mockData';
 import NewProcessModal from '../components/NewProcessModal'; // <--- Importamos o modal aqui
 
 export default function Processos() {
   // Estado local para gerenciar a lista e a visibilidade do modal
-  const [processos, setProcessos] = useState(PROCESSOS_MOCK);
+  const [processos, setProcessos] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Fetch processos from Supabase on mount
+  useEffect(() => {
+    const fetchProcessos = async () => {
+      const { data, error } = await supabase
+        .from('processos')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('Erro ao buscar processos:', error);
+        return;
+      }
+      if (data) setProcessos(data);
+    };
+    fetchProcessos();
+  }, []);
+
   // Função chamada quando o formulário é salvo (Simula o INSERT)
-  const handleCreateProcess = (novoProcesso) => {
-    // Formata a data para ficar visualmente bonita (DD/MM/AAAA)
-    const formatDate = (dateStr) => {
-      if (!dateStr) return '';
-      const [ano, mes, dia] = dateStr.split('-');
-      return `${dia}/${mes}/${ano}`;
-    };
-
-    const processoFormatado = {
-      id: processos.length + 100, // Gera um ID fictício
-      nome: novoProcesso.nome,
-      periodo: `${formatDate(novoProcesso.inicio)} - ${formatDate(novoProcesso.fim)}`,
-      fase_atual: 'Planejamento', // Começa sempre no início
-      progresso: 0,
-      permitir_alteracao: true
-    };
-
-    // Atualiza a lista na tela (Optimistic UI)
-    setProcessos([processoFormatado, ...processos]); 
+  const handleCreateProcess = async (novoProcesso) => {
+    const { data, error } = await supabase
+      .from('processos')
+      .insert([
+        {
+          nome: novoProcesso.nome,
+          inicio: novoProcesso.inicio,
+          fim: novoProcesso.fim,
+          descricao: novoProcesso.descricao,
+        },
+      ])
+      .select();
+    if (error) {
+      console.error('Erro ao criar processo:', error);
+      throw error;
+    }
+    if (data && data.length > 0) {
+      // Optimistic UI: prepend new process
+      setProcessos([data[0], ...processos]);
+      setIsModalOpen(false);
+    }
   };
 
   const handleDelete = (id) => {
@@ -44,7 +63,7 @@ export default function Processos() {
           <h2 className="text-2xl font-bold text-slate-800">Gerenciamento dos Processos</h2>
           <p className="text-slate-500 text-sm mt-1">Administre editais e fases de seleção.</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)} // <--- Abre o Modal
           className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
         >
@@ -78,14 +97,14 @@ export default function Processos() {
                   </td>
                   <td className="px-6 py-5 text-sm text-slate-600 whitespace-nowrap">
                     <div className="flex items-center">
-                      <Calendar size={16} className="mr-2 text-slate-400"/>
+                      <Calendar size={16} className="mr-2 text-slate-400" />
                       {proc.periodo}
                     </div>
                   </td>
                   <td className="px-6 py-5 text-sm font-bold text-blue-600">{proc.fase_atual}</td>
                   <td className="px-6 py-5 align-middle">
                     <div className="w-full max-w-[100px] mx-auto bg-slate-100 rounded-full h-2">
-                      <div className="bg-emerald-500 h-2 rounded-full" style={{width: `${proc.progresso}%`}}></div>
+                      <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${proc.progresso}%` }}></div>
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">
@@ -96,9 +115,9 @@ export default function Processos() {
                       <button className="p-2 text-slate-400 hover:text-amber-600 rounded-lg transition-colors" title="Editar">
                         <Edit size={18} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(proc.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors" 
+                        className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
                         title="Excluir"
                       >
                         <Trash2 size={18} />
@@ -113,10 +132,10 @@ export default function Processos() {
       </div>
 
       {/* Renderização do Modal */}
-      <NewProcessModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSave={handleCreateProcess} 
+      <NewProcessModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleCreateProcess}
       />
     </div>
   );

@@ -34,32 +34,20 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signIn = async (email, password) => {
-    // --- BYPASS DE TESTE (IMPORTANTE) ---
-    if (email === 'admin@seduc.pa.gov.br' && password === '123456') {
-      const fakeUser = { id: 'admin-123', email: email };
-      setUser(fakeUser);
-      return { user: fakeUser, session: { access_token: 'fake-token' } };
-    }
-    // ------------------------------------
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-      if (data?.user) setUser(data.user);
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    if (data?.user) setUser(data.user);
+    return data;
   };
 
   const signOut = async () => {
     setUser(null);
     try {
       await supabase.auth.signOut();
-    } catch (error) {
+    } catch {
       console.log("Logout local");
     }
   };
@@ -82,4 +70,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
