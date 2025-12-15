@@ -1,36 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, GitCommit, AlertTriangle, CheckCircle, 
-  Map, BarChart3 
+import {
+  Users, GitCommit, AlertTriangle, CheckCircle,
+  Map, BarChart3
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import { CardSkeleton, Skeleton } from '../components/ui/Loading'; // Importando novos componentes
 import { DASHBOARD_DATA } from '../data/mockData';
+import { supabase } from '../lib/supabaseClient';
 
 // Componentes internos (Funnel e HeatMap) adaptados para receber 'loading'
 const FunnelChart = ({ loading }) => (
   <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
-    <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center"><BarChart3 size={18} className="mr-2 text-slate-500"/> Funil de Seleção Global</h3>
+    <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center"><BarChart3 size={18} className="mr-2 text-slate-500" /> Funil de Seleção Global</h3>
     <div className="space-y-4">
-      {loading 
+      {loading
         ? Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-8 w-full rounded-full" />)
         : [
-            { label: 'Inscritos', val: '100%', count: 28450, color: 'bg-blue-600' },
-            { label: 'Habilitados', val: '80%', count: 22760, color: 'bg-blue-500' },
-            { label: 'Títulos Validados', val: '45%', count: 12800, color: 'bg-indigo-500' },
-            { label: 'Classificados', val: '20%', count: 5690, color: 'bg-purple-500' },
-            { label: 'Convocados', val: '5%', count: 1422, color: 'bg-emerald-500' }
-          ].map((step, idx) => (
-            <div key={idx} className="relative group cursor-default">
-              <div className="flex justify-between text-xs mb-1.5 font-semibold text-slate-600">
-                <span>{step.label}</span>
-                <span>{step.count.toLocaleString()}</span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                <div className={`h-full ${step.color} rounded-full transition-all duration-1000 group-hover:opacity-80`} style={{ width: step.val }}></div>
-              </div>
+          { label: 'Inscritos', val: '100%', count: 28450, color: 'bg-blue-600' },
+          { label: 'Habilitados', val: '80%', count: 22760, color: 'bg-blue-500' },
+          { label: 'Títulos Validados', val: '45%', count: 12800, color: 'bg-indigo-500' },
+          { label: 'Classificados', val: '20%', count: 5690, color: 'bg-purple-500' },
+          { label: 'Convocados', val: '5%', count: 1422, color: 'bg-emerald-500' }
+        ].map((step, idx) => (
+          <div key={idx} className="relative group cursor-default">
+            <div className="flex justify-between text-xs mb-1.5 font-semibold text-slate-600">
+              <span>{step.label}</span>
+              <span>{step.count.toLocaleString()}</span>
             </div>
-          ))
+            <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+              <div className={`h-full ${step.color} rounded-full transition-all duration-1000 group-hover:opacity-80`} style={{ width: step.val }}></div>
+            </div>
+          </div>
+        ))
       }
     </div>
   </div>
@@ -38,9 +39,9 @@ const FunnelChart = ({ loading }) => (
 
 const HeatMap = ({ loading }) => (
   <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
-    <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center"><Map size={18} className="mr-2 text-slate-500"/> Mapa de Calor (Demandas Críticas)</h3>
+    <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center"><Map size={18} className="mr-2 text-slate-500" /> Mapa de Calor (Demandas Críticas)</h3>
     <div className="grid grid-cols-2 gap-4">
-      {loading 
+      {loading
         ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)
         : (
           /* Mock manual para simplificar, mas idealmente viria de props */
@@ -74,11 +75,29 @@ const HeatMap = ({ loading }) => (
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ candidatos: 0, processos: 0 });
 
   // Simulando carregamento de dados (2 segundos)
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
+    const fetchDashboardData = async () => {
+      try {
+        const { count: countCandidatos } = await supabase
+          .from('candidatos')
+          .select('*', { count: 'exact', head: true });
+
+        const { count: countProcessos } = await supabase
+          .from('processos')
+          .select('*', { count: 'exact', head: true });
+
+        setStats({ candidatos: countCandidatos, processos: countProcessos });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   return (
@@ -93,8 +112,8 @@ export default function Dashboard() {
           </>
         ) : (
           <>
-            <StatCard title="Processos Ativos" value={DASHBOARD_DATA.kpis.processos_ativos} icon={GitCommit} color="bg-blue-100 text-blue-600" />
-            <StatCard title="Candidatos Totais" value={DASHBOARD_DATA.kpis.candidatos_total.toLocaleString()} icon={Users} color="bg-purple-100 text-purple-600" subtext="+12% essa semana" />
+            <StatCard title="Processos Ativos" value={stats.processos} icon={GitCommit} color="bg-blue-100 text-blue-600" />
+            <StatCard title="Candidatos Totais" value={stats.candidatos.toLocaleString()} icon={Users} color="bg-purple-100 text-purple-600" subtext="+12% essa semana" />
             <StatCard title="Vagas Preenchidas" value={DASHBOARD_DATA.kpis.vagas_preenchidas} icon={CheckCircle} color="bg-emerald-100 text-emerald-600" />
             <StatCard title="Atrasos Críticos" value={DASHBOARD_DATA.kpis.delayedProcesses} icon={AlertTriangle} color="bg-red-100 text-red-600" alert={true} subtext="Requer atenção imediata" />
           </>

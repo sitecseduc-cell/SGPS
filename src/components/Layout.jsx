@@ -82,7 +82,7 @@ export default function Layout() {
           </SidebarGroup>
 
           <SidebarGroup title="Análise & Avaliação">
-            <SidebarItem icon={FileText} label="Análise de Documentos" to="/docs" />
+
             <SidebarItem icon={BookOpen} label="Análise de Plano" to="/plano" />
             <SidebarItem icon={CheckCircle} label="Pré Avaliação" to="/pre" />
           </SidebarGroup>

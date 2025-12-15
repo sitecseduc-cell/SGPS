@@ -1,62 +1,107 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, FileText, Calendar, Layers, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { PROCESSOS_MOCK } from '../data/mockData';
-import NewProcessModal from '../components/NewProcessModal'; // <--- Importamos o modal aqui
+import NewProcessModal from '../components/NewProcessModal';
 
 export default function Processos() {
-  // Estado local para gerenciar a lista e a visibilidade do modal
   const [processos, setProcessos] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProcess, setEditingProcess] = useState(null); // Estado para saber quem estamos editando
 
-  // Fetch processos from Supabase on mount
   useEffect(() => {
-    const fetchProcessos = async () => {
-      const { data, error } = await supabase
-        .from('processos')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) {
-        console.error('Erro ao buscar processos:', error);
-        return;
-      }
-      if (data) setProcessos(data);
-    };
     fetchProcessos();
   }, []);
 
-  // Função chamada quando o formulário é salvo (Simula o INSERT)
-  const handleCreateProcess = async (novoProcesso) => {
+  const fetchProcessos = async () => {
     const { data, error } = await supabase
       .from('processos')
-      .insert([
-        {
-          nome: novoProcesso.nome,
-          inicio: novoProcesso.inicio,
-          fim: novoProcesso.fim,
-          descricao: novoProcesso.descricao,
-        },
-      ])
-      .select();
-    if (error) {
-      console.error('Erro ao criar processo:', error);
-      throw error;
-    }
-    if (data && data.length > 0) {
-      // Optimistic UI: prepend new process
-      setProcessos([data[0], ...processos]);
-      setIsModalOpen(false);
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) console.error('Erro ao buscar processos:', error);
+    else if (data) setProcessos(data);
+  };
+
+  // Abre modal para CRIAR
+  const handleOpenCreate = () => {
+    setEditingProcess(null);
+    setIsModalOpen(true);
+  };
+
+  // Abre modal para EDITAR
+  const handleOpenEdit = (proc) => {
+    setEditingProcess(proc);
+    setIsModalOpen(true);
+  };
+
+  // Função Centralizada de Salvar (Cria ou Atualiza)
+  const handleSaveProcess = async (formData) => {
+    if (editingProcess) {
+      // --- MODO EDIÇÃO (UPDATE) ---
+      const { data, error } = await supabase
+        .from('processos')
+        .update({
+          nome: formData.nome,
+          inicio: formData.inicio,
+          fim: formData.fim,
+          descricao: formData.descricao,
+        })
+        .eq('id', editingProcess.id)
+        .select();
+
+      if (error) {
+        console.error('Erro ao atualizar:', error);
+        alert('Erro ao atualizar processo.');
+      } else if (data && data.length > 0) {
+        // Atualiza a lista localmente
+        setProcessos(processos.map(p => p.id === editingProcess.id ? data[0] : p));
+        setIsModalOpen(false);
+      }
+
+    } else {
+      // --- MODO CRIAÇÃO (INSERT) ---
+      const { data, error } = await supabase
+        .from('processos')
+        .insert([{
+          nome: formData.nome,
+          inicio: formData.inicio,
+          fim: formData.fim,
+          descricao: formData.descricao,
+          fase_atual: 'Planejamento', // Valor padrão
+          progresso: 0
+        }])
+        .select();
+
+      if (error) {
+        console.error('Erro ao criar:', error);
+        alert('Erro ao criar processo.');
+      } else if (data && data.length > 0) {
+        setProcessos([data[0], ...processos]);
+        setIsModalOpen(false);
+      }
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este processo?')) {
-      setProcessos(processos.filter(p => p.id !== id));
+      const { error } = await supabase.from('processos').delete().eq('id', id);
+      if (error) {
+        console.error('Erro ao excluir:', error);
+        alert('Erro ao excluir.');
+      } else {
+        setProcessos(processos.filter(p => p.id !== id));
+      }
     }
+  };
+
+  // Função auxiliar para formatar data (opcional, para ficar bonito na tabela)
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn pb-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
@@ -64,13 +109,12 @@ export default function Processos() {
           <p className="text-slate-500 text-sm mt-1">Administre editais e fases de seleção.</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)} // <--- Abre o Modal
+          onClick={handleOpenCreate}
           className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
         >
           <Plus size={20} /><span>Cadastrar Processo</span>
         </button>
       </div>
-
       {/* Tabela */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
@@ -85,6 +129,9 @@ export default function Processos() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
+              {processos.length === 0 && (
+                <tr><td colSpan="5" className="p-6 text-center text-slate-400">Nenhum processo cadastrado.</td></tr>
+              )}
               {processos.map((proc) => (
                 <tr key={proc.id} className="hover:bg-slate-50 transition-colors group">
                   <td className="px-6 py-5">
@@ -98,13 +145,13 @@ export default function Processos() {
                   <td className="px-6 py-5 text-sm text-slate-600 whitespace-nowrap">
                     <div className="flex items-center">
                       <Calendar size={16} className="mr-2 text-slate-400" />
-                      {proc.periodo}
+                      {formatDate(proc.inicio)} - {formatDate(proc.fim)}
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-sm font-bold text-blue-600">{proc.fase_atual}</td>
+                  <td className="px-6 py-5 text-sm font-bold text-blue-600">{proc.fase_atual || 'Planejamento'}</td>
                   <td className="px-6 py-5 align-middle">
                     <div className="w-full max-w-[100px] mx-auto bg-slate-100 rounded-full h-2">
-                      <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${proc.progresso}%` }}></div>
+                      <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${proc.progresso || 0}%` }}></div>
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">
@@ -112,9 +159,16 @@ export default function Processos() {
                       <button className="p-2 text-slate-400 hover:text-blue-600 rounded-lg transition-colors" title="Editar Fases">
                         <Layers size={18} />
                       </button>
-                      <button className="p-2 text-slate-400 hover:text-amber-600 rounded-lg transition-colors" title="Editar">
+
+                      {/* Botão de Editar Ativado */}
+                      <button
+                        onClick={() => handleOpenEdit(proc)}
+                        className="p-2 text-slate-400 hover:text-amber-600 rounded-lg transition-colors"
+                        title="Editar"
+                      >
                         <Edit size={18} />
                       </button>
+
                       <button
                         onClick={() => handleDelete(proc.id)}
                         className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
@@ -131,11 +185,11 @@ export default function Processos() {
         </div>
       </div>
 
-      {/* Renderização do Modal */}
       <NewProcessModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={handleCreateProcess}
+        onSave={handleSaveProcess}
+        processoParaEditar={editingProcess}
       />
     </div>
   );
