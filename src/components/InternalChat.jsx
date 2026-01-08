@@ -17,13 +17,38 @@ export default function InternalChat() {
     const [usersList, setUsersList] = useState([]);
     const messagesEndRef = useRef(null);
 
+    // Listen for external open requests
+    useEffect(() => {
+        const handleOpenChat = (event) => {
+            setIsOpen(true);
+            if (event.detail?.userId) {
+                // If a specific user is requested (e.g. from notification)
+                // We need to find the user object first implies we need to have fetched users or fetch him now.
+                // For simplicity, we might just switch tab or try to set selectedUser if we have users list.
+                // A robust way: fetch that single user profile and set it.
+                fetchUserProfileAndOpen(event.detail.userId);
+            }
+        };
+
+        window.addEventListener('open-internal-chat', handleOpenChat);
+        return () => window.removeEventListener('open-internal-chat', handleOpenChat);
+    }, []);
+
+    const fetchUserProfileAndOpen = async (uid) => {
+        const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();
+        if (data) {
+            setSelectedUser(data);
+            setActiveTab('direct_chat');
+        }
+    };
+
     // Initial Load & Listeners
     useEffect(() => {
         if (!isOpen) return;
 
         // Load Users when tab changes to users
         if (activeTab === 'users') {
-            fetchUsers();
+            fetchUsers([]);
         }
 
         // Load Messages corresponding to the active view
@@ -54,33 +79,40 @@ export default function InternalChat() {
     };
 
     const fetchMessages = async () => {
-        let query = supabase
-            .from('chat_messages')
-            .select(`
-                id, content, created_at, sender_id, receiver_id,
-                profiles:sender_id (full_name, avatar_url)
-            `)
-            .order('created_at', { ascending: true })
-            .limit(50);
+        try {
+            let query = supabase
+                .from('chat_messages')
+                .select(`
+                    id, content, created_at, sender_id, receiver_id,
+                    profiles:sender_id (full_name, avatar_url)
+                `)
+                .order('created_at', { ascending: true })
+                .limit(50);
 
-        if (activeTab === 'global') {
-            query = query.is('receiver_id', null);
-        } else if (activeTab === 'direct_chat' && selectedUser) {
-            // Logic: (sender=Me AND receiver=Him) OR (sender=Him AND receiver=Me)
-            query = query.or(`and(sender_id.eq.${user.id},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${user.id})`);
-        } else {
-            return; // No messages to fetch for list view
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-            console.error("Erro ao carregar mensagens:", error);
-            if (error.code === '42P01') {
-                toast.error("Tabela de chat não encontrada.");
+            if (activeTab === 'global') {
+                query = query.is('receiver_id', null);
+            } else if (activeTab === 'direct_chat' && selectedUser) {
+                console.log('Fetching DM between:', user.id, 'and', selectedUser.id);
+                // Using a clearer OR syntax for Supabase
+                query = query.or(`and(sender_id.eq.${user.id},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${user.id})`);
+            } else {
+                return; // No messages to fetch for list view
             }
-        } else {
-            setMessages(data || []);
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error("Erro ao carregar mensagens:", error);
+                if (error.code === '42P01') {
+                    toast.error("Tabela de chat não encontrada.");
+                } else {
+                    toast.error("Erro ao carregar chat: " + error.message);
+                }
+            } else {
+                setMessages(data || []);
+            }
+        } catch (err) {
+            console.error("Exception in fetchMessages:", err);
         }
     };
 
@@ -239,8 +271,8 @@ export default function InternalChat() {
                                                 </span>
                                             )}
                                             <div className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm shadow-sm relative group ${isMe
-                                                    ? 'bg-slate-800 text-white rounded-br-none'
-                                                    : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-bl-none'
+                                                ? 'bg-slate-800 text-white rounded-br-none'
+                                                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-bl-none'
                                                 }`}>
                                                 {msg.content}
                                                 <span className="text-[9px] opacity-50 block text-right mt-1 -mb-1">
@@ -320,8 +352,8 @@ export default function InternalChat() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`pointer-events-auto p-4 rounded-full shadow-lg shadow-slate-900/20 transition-all duration-300 flex items-center justify-center border-2 border-white dark:border-slate-800 ${isOpen
-                        ? 'bg-slate-700 text-white hover:bg-slate-800'
-                        : 'bg-slate-900 text-white hover:bg-slate-800 animate-pulse-slow'
+                    ? 'bg-slate-700 text-white hover:bg-slate-800'
+                    : 'bg-slate-900 text-white hover:bg-slate-800 animate-pulse-slow'
                     }`}
                 title="Chat da Equipe"
             >
