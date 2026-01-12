@@ -28,33 +28,7 @@ export default function Dashboard() {
   const [funnelData, setFunnelData] = useState([]);
 
   useEffect(() => {
-    // --- DB DIAGNOSTIC CHECK ---
-    const checkDbHealth = async () => {
-      try {
-        console.log("Checking DB health...");
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return; // Not logged in
 
-        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-
-        if (error) {
-          console.error("DB Check Failed:", error);
-          toast.error(`Erro de Banco de Dados: ${error.message || error.code || 'Desconhecido'}. (Tabela profiles faltando ou RLS bloqueando)`);
-        } else if (data) {
-          console.log("DB Check Success:", data);
-          if (data.role === 'admin') {
-            toast.success(`Sistema Conectado. Perfil: ADMIN`);
-          } else {
-            toast.info(`Sistema Conectado. Perfil: ${data.role || 'Sem cargo'}`);
-          }
-        } else {
-          toast.warning("Usuário sem perfil na tabela 'profiles'. Rode o SQL de correção.");
-        }
-      } catch (err) {
-        console.error("Health check crash:", err);
-      }
-    };
-    checkDbHealth();
 
     const fetchDashboardData = async () => {
       try {
@@ -83,12 +57,26 @@ export default function Dashboard() {
           setStats({ candidatos: c || 0, processos: p || 0, vagasPreenchidas: 0, atrasos: 0 });
         }
 
-        // Funnel Mockado melhorado com dados reais básicos se tiver
+        // Fetch Status Counts for Funnel (Parallel)
+        const [
+          { count: countAnalise },
+          { count: countClassificados },
+          { count: countConvocados }
+        ] = await Promise.all([
+          supabase.from('candidatos').select('*', { count: 'exact', head: true }).eq('status', 'Em Análise'),
+          supabase.from('candidatos').select('*', { count: 'exact', head: true }).eq('status', 'Classificado'),
+          supabase.from('candidatos').select('*', { count: 'exact', head: true }).eq('status', 'Convocado')
+        ]);
+
+        const totalAnalise = countAnalise || 0;
+        const totalClassificados = countClassificados || 0;
+        const totalConvocados = countConvocados || 0;
+
         setFunnelData([
           { label: 'Inscritos Totais', count: finalCandidatos, color: 'bg-blue-600' },
-          { label: 'Em Análise', count: Math.floor(finalCandidatos * 0.6), color: 'bg-blue-500' }, // Estimativa se não tiver dado real
-          { label: 'Classificados', count: Math.floor(finalCandidatos * 0.3), color: 'bg-purple-500' },
-          { label: 'Convocados', count: Math.floor(finalCandidatos * 0.1), color: 'bg-emerald-500' }
+          { label: 'Em Análise', count: totalAnalise, color: 'bg-blue-500' },
+          { label: 'Classificados', count: totalClassificados, color: 'bg-purple-500' },
+          { label: 'Convocados', count: totalConvocados, color: 'bg-emerald-500' }
         ]);
 
       } catch (e) {

@@ -11,7 +11,7 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Processos = React.lazy(() => import('./pages/Processos'));
 const Inscritos = React.lazy(() => import('./pages/Inscritos'));
 const Kanban = React.lazy(() => import('./pages/Kanban'));
-const EmConstrucao = React.lazy(() => import('./pages/EmConstrucao'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
 const ControleVagas = React.lazy(() => import('./pages/ControleVagas'));
 const Auditoria = React.lazy(() => import('./pages/Auditoria'));
 const PesquisaCandidatos = React.lazy(() => import('./pages/PesquisaCandidatos'));
@@ -74,7 +74,7 @@ export default function App() {
                   <Route path="relatorios" element={<Relatorios />} />
                   <Route path="seguranca" element={<Seguranca />} />
 
-                  <Route path="*" element={<EmConstrucao titulo="Página em Desenvolvimento" />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
               </Route>
 

@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = async (userId: string, retryCount = 0) => {
     // Prevent duplicate fetches for the same user (only checking on initial attempt)
     if (fetchingUserId.current === userId && retryCount === 0) {
-      console.log(`[Auth] ⏳ Profile fetch already in progress for ${userId}, skipping duplicate.`);
+      // console.log(`[Auth] ⏳ Profile fetch already in progress for ${userId}, skipping duplicate.`);
       return;
     }
 
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       fetchingUserId.current = userId;
     }
 
-    console.log(`[Auth] 🔍 Fetching profile for user: ${userId} (Attempt ${retryCount + 1})`);
+    // console.log(`[Auth] 🔍 Fetching profile for user: ${userId} (Attempt ${retryCount + 1})`);
 
     const abortController = new AbortController();
 
@@ -92,11 +92,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (data) {
-        console.log(`[Auth] ✅ Profile loaded successfully:`, {
-          id: data.id,
-          role: data.role,
-          email: data.email
-        });
+        // console.log(`[Auth] ✅ Profile loaded successfully:`, {
+        //   id: data.id,
+        //   role: data.role,
+        //   email: data.email
+        // });
         setProfile(data);
       } else {
         console.warn('[Auth] ⚠️ No profile data returned');
@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Retry logic for timeouts or network errors
       if (retryCount < 3) { // Try 3 times
         const backoff = (retryCount + 1) * 2000; // 2s, 4s, 6s...
-        console.log(`[Auth] ⚠️ Retrying profile fetch in ${backoff}ms...`);
+        // console.log(`[Auth] ⚠️ Retrying profile fetch in ${backoff}ms...`);
         await new Promise(resolve => setTimeout(resolve, backoff));
         return fetchProfile(userId, retryCount + 1);
       }
@@ -140,7 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let safetyTimeout: any;
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`[Auth] 🔄 Auth Event: ${event}`);
+      // console.log(`[Auth] 🔄 Auth Event: ${event}`);
       setUser(session?.user ?? null);
 
       if (session?.user) {
