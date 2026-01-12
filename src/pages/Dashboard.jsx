@@ -16,6 +16,7 @@ import StatCard from '../components/StatCard';
 import FunnelChart from '../components/FunnelChart';
 import CardSkeleton from '../components/CardSkeleton';
 import OnboardingTour from '../components/OnboardingTour';
+import DebugStatus from '../components/DebugStatus';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -159,6 +160,7 @@ export default function Dashboard() {
         </div>
       </div>
       <OnboardingTour />
+      <DebugStatus />
     </div>
   );
 }
