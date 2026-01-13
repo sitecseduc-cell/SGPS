@@ -54,12 +54,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const abortController = new AbortController();
 
     try {
-      // Create a timeout promise that rejects after 10 seconds (optimized for speed)
+      // Create a timeout promise that rejects after 6 seconds
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => {
           abortController.abort();
           reject(new Error('Profile fetch timed out'));
-        }, 10000)
+        }, 6000)
       );
 
       // The actual supabase query
@@ -92,11 +92,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (data) {
-        // console.log(`[Auth] ✅ Profile loaded successfully:`, {
-        //   id: data.id,
-        //   role: data.role,
-        //   email: data.email
-        // });
         setProfile(data);
       } else {
         console.warn('[Auth] ⚠️ No profile data returned');
@@ -110,10 +105,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error("[Auth] ❌ Unexpected error fetching profile:", err);
       }
 
-      // Retry logic for timeouts or network errors
-      if (retryCount < 3) { // Try 3 times
-        const backoff = (retryCount + 1) * 1000; // 1s, 2s, 3s...
-        // console.log(`[Auth] ⚠️ Retrying profile fetch in ${backoff}ms...`);
+      // Retry logic - REDUCED to 1 retry
+      if (retryCount < 1) {
+        const backoff = 1000;
         await new Promise(resolve => setTimeout(resolve, backoff));
         return fetchProfile(userId, retryCount + 1);
       }
@@ -145,11 +139,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (session?.user) {
         // Se houver usuário, buscamos o perfil
-        // O safetyTimeout aqui deve ser maior que o timeout da busca (agora 10s + retries)
+        // O safetyTimeout aqui deve ser maior que o timeout da busca (agora 6s + retry)
         safetyTimeout = setTimeout(() => {
-          console.warn("[Auth] ⚠️ Safety Timeout: Perfil demorou demais para carregar (15s). Liberando app.");
+          console.warn("[Auth] ⚠️ Safety Timeout: Perfil demorou demais (12s). Liberando app.");
           setLoading(false);
-        }, 15000); // 15 segundos
+        }, 12000); // 12 segundos
+
+        await fetchProfile(session.user.id);
+
+        if (safetyTimeout) clearTimeout(safetyTimeout);
+        setLoading(false);
 
         await fetchProfile(session.user.id);
 

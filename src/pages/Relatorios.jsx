@@ -306,7 +306,7 @@ export default function Relatorios() {
 
             {/* Nota de rodapé para impressão */}
             <div className="hidden print:block mt-20 text-center text-sm text-slate-400">
-                <p>Relatório gerado pelo sistema SAGEP 2.0 em {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}</p>
+                <p>Relatório gerado pelo sistema CPS 2.0 em {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}</p>
             </div>
         </div>
     );

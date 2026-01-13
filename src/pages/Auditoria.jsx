@@ -117,7 +117,7 @@ export default function Auditoria() {
             doc.setPage(i);
             doc.setFontSize(8);
             doc.text(`Página ${i} de ${pageCount}`, 190, 285, { align: "right" });
-            doc.text("Documento gerado eletronicamente pelo sistema oficial SGPS/SAGEP.", 105, 285, { align: "center" });
+            doc.text("Documento gerado eletronicamente pelo sistema oficial SGPS/CPS.", 105, 285, { align: "center" });
             doc.text("IOEPA - Imprensa Oficial do Estado", 20, 285, { align: "left" });
         }
 

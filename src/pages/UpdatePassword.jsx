@@ -48,10 +48,10 @@ export default function UpdatePassword() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 p-8">
         <div className="text-center mb-8">
-          <img 
-            src={logoSistema} 
-            alt="Logo SAGEP" 
-            className="h-16 w-16 object-cover mx-auto mb-4 rounded-lg" 
+          <img
+            src={logoSistema}
+            alt="Logo CPS"
+            className="h-16 w-16 object-cover mx-auto mb-4 rounded-lg"
           />
           <h1 className="text-2xl font-bold text-slate-800">Redefinir Senha</h1>
           <p className="text-slate-500 text-sm mt-2">Digite sua nova senha abaixo.</p>
@@ -77,8 +77,8 @@ export default function UpdatePassword() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Nova Senha</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   required
                   className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   placeholder="••••••••"
@@ -92,8 +92,8 @@ export default function UpdatePassword() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Confirme a Nova Senha</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   required
                   className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   placeholder="••••••••"
@@ -103,8 +103,8 @@ export default function UpdatePassword() {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >

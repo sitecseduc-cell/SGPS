@@ -102,13 +102,13 @@ export default function Login() {
   const header = getHeaderInfo();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 transition-all">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-200/60 transition-all">
 
         {/* Header */}
         <div className="bg-slate-900 p-8 text-center">
-          <img src={logoSistema} alt="Logo SAGEP" className="h-16 w-16 object-cover mx-auto mb-4 rounded-lg" />
-          <h1 className="text-2xl font-bold text-white tracking-tight">SGPS <span className="text-blue-400">SAGEP</span></h1>
+          <img src={logoSistema} alt="Logo CPS" className="h-16 w-16 object-cover mx-auto mb-4 rounded-lg" />
+          <h1 className="text-2xl font-bold text-white tracking-tight">SGPS <span className="text-blue-400">CPS</span></h1>
           <p className="text-slate-400 text-sm mt-2">{header.subtitle}</p>
         </div>
 

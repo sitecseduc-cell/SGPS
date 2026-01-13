@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export default function OnboardingTour() {
     useEffect(() => {
         // Verifica se já viu o tour
-        const hasSeenTour = localStorage.getItem('sagep_tour_completed');
+        const hasSeenTour = localStorage.getItem('cps_tour_completed');
 
         if (!hasSeenTour) {
             const tourDriver = driver({
@@ -48,7 +48,7 @@ export default function OnboardingTour() {
                 ],
                 onDestroyed: () => {
                     // Salva que o usuário já viu o tour para não abrir de novo
-                    localStorage.setItem('sagep_tour_completed', 'true');
+                    localStorage.setItem('cps_tour_completed', 'true');
                 }
             });
 

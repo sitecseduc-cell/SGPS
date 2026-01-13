@@ -13,8 +13,15 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f8fafc;
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
   min-height: 100vh;
   width: 100%;
+}
+
+.dark body {
+  background-color: #0f172a;
+  background-image: radial-gradient(#1e293b 1px, transparent 1px);
 }
 
 #root {
@@ -23,27 +30,46 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* Custom Scrollbar for Sidebar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+/* Custom Scrollbar for Sidebar & Body */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #0f172a; 
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155; 
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
   border-radius: 10px;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #475569; 
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
 /* --- Driver.js Custom Theme (Onboarding) --- */
@@ -58,7 +84,8 @@ body {
 }
 
 .driver-popover.driverjs-theme .driver-popover-title {
-  color: #0f172a; /* Slate 900 */
+  color: #0f172a;
+  /* Slate 900 */
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -66,7 +93,8 @@ body {
 }
 
 .driver-popover.driverjs-theme .driver-popover-description {
-  color: #64748b; /* Slate 500 */
+  color: #64748b;
+  /* Slate 500 */
   font-size: 0.95rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
@@ -78,7 +106,8 @@ body {
 }
 
 .driver-popover.driverjs-theme .driver-popover-btn {
-  background-color: #f1f5f9; /* Slate 100 */
+  background-color: #f1f5f9;
+  /* Slate 100 */
   color: #475569;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -95,14 +124,16 @@ body {
 }
 
 .driver-popover.driverjs-theme .driver-popover-next-btn {
-  background-color: #2563eb !important; /* Blue 600 */
+  background-color: #2563eb !important;
+  /* Blue 600 */
   color: white !important;
   border: 1px solid #2563eb !important;
   box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
 
 .driver-popover.driverjs-theme .driver-popover-next-btn:hover {
-  background-color: #1d4ed8 !important; /* Blue 700 */
+  background-color: #1d4ed8 !important;
+  /* Blue 700 */
   transform: translateY(-1px);
 }
 

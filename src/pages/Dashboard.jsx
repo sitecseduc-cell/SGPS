@@ -16,7 +16,6 @@ import StatCard from '../components/StatCard';
 import FunnelChart from '../components/FunnelChart';
 import CardSkeleton from '../components/CardSkeleton';
 import OnboardingTour from '../components/OnboardingTour';
-import DebugStatus from '../components/DebugStatus';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -29,59 +28,34 @@ export default function Dashboard() {
   const [funnelData, setFunnelData] = useState([]);
 
   useEffect(() => {
-
-
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Tenta RPC, se falhar usa base manual
-        const { data: kpisData, error: kpiError } = await supabase.rpc('get_dashboard_kpis');
 
-        let finalCandidatos = 0;
-        let finalProcessos = 0;
+        // ÚNICA requisição para buscar tudo
+        const { data, error } = await supabase.rpc('get_dashboard_stats');
 
-        if (!kpiError) {
-          finalCandidatos = kpisData.candidatos || 0;
-          finalProcessos = kpisData.processos || 0;
-          setStats({
-            candidatos: kpisData.candidatos,
-            processos: kpisData.processos,
-            vagasPreenchidas: kpisData.vagas,
-            atrasos: 0
-          });
-        } else {
-          // Fallback simples
-          const { count: c } = await supabase.from('candidatos').select('*', { count: 'exact', head: true });
-          const { count: p } = await supabase.from('processos').select('*', { count: 'exact', head: true });
-          finalCandidatos = c || 0;
-          finalProcessos = p || 0;
-          setStats({ candidatos: c || 0, processos: p || 0, vagasPreenchidas: 0, atrasos: 0 });
-        }
+        if (error) throw error;
 
-        // Fetch Status Counts for Funnel (Parallel)
-        const [
-          { count: countAnalise },
-          { count: countClassificados },
-          { count: countConvocados }
-        ] = await Promise.all([
-          supabase.from('candidatos').select('*', { count: 'exact', head: true }).eq('status', 'Em Análise'),
-          supabase.from('candidatos').select('*', { count: 'exact', head: true }).eq('status', 'Classificado'),
-          supabase.from('candidatos').select('*', { count: 'exact', head: true }).eq('status', 'Convocado')
-        ]);
+        // Atualiza Cards
+        setStats({
+          candidatos: data.total_candidatos || 0,
+          processos: data.total_processos || 0,
+          vagasPreenchidas: data.vagas_preenchidas || 0,
+          atrasos: 0 // Se precisar calcular atrasos, faça no SQL também
+        });
 
-        const totalAnalise = countAnalise || 0;
-        const totalClassificados = countClassificados || 0;
-        const totalConvocados = countConvocados || 0;
-
+        // Atualiza Funil sem novas requisições
         setFunnelData([
-          { label: 'Inscritos Totais', count: finalCandidatos, color: 'bg-blue-600' },
-          { label: 'Em Análise', count: totalAnalise, color: 'bg-blue-500' },
-          { label: 'Classificados', count: totalClassificados, color: 'bg-purple-500' },
-          { label: 'Convocados', count: totalConvocados, color: 'bg-emerald-500' }
+          { label: 'Inscritos Totais', count: data.total_candidatos, color: 'bg-blue-600' },
+          { label: 'Em Análise', count: data.em_analise, color: 'bg-blue-500' },
+          { label: 'Classificados', count: data.classificados, color: 'bg-purple-500' },
+          { label: 'Convocados', count: data.convocados, color: 'bg-emerald-500' }
         ]);
 
       } catch (e) {
-        console.error(e);
+        console.error('Erro ao carregar dashboard:', e);
+        toast.error('Erro ao atualizar dados');
       } finally {
         setLoading(false);
       }
@@ -93,15 +67,17 @@ export default function Dashboard() {
     <div className="space-y-8 animate-fadeIn pb-10">
 
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-indigo-950 dark:to-slate-900 rounded-2xl p-8 text-white shadow-2xl relative overflow-hidden border border-slate-700/50 group">
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold mb-2">Bem-vindo à SAGEP</h1>
-          <p className="text-blue-100 max-w-2xl text-lg">
+          <h1 className="text-3xl font-bold mb-2 tracking-tight">Bem-vindo à CPS</h1>
+          <p className="text-slate-300 max-w-2xl text-lg leading-relaxed">
             Seu painel de controle central para gestão de processos seletivos públicos.
             Acompanhe indicadores em tempo real e inicie novas ações.
           </p>
         </div>
-        <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform translate-x-12"></div>
+        <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform translate-x-12 transition-transform duration-700 group-hover:translate-x-6"></div>
+        <div className="absolute -bottom-24 -left-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* KPIs Grid */}
@@ -160,7 +136,6 @@ export default function Dashboard() {
         </div>
       </div>
       <OnboardingTour />
-      <DebugStatus />
     </div>
   );
 }

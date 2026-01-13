@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabaseClient';
@@ -77,7 +78,45 @@ export default function Layout() {
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      // Optional: Subscribe to realtime, but fetching on mount/open is good for now
+
+      // Realtime Subscriptions
+      const channel = supabase
+        .channel('realtime-notifications')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `receiver_id=eq.${user.id}` },
+          (payload) => {
+            // New Message
+            const newMsg = payload.new;
+            toast.info('Nova mensagem recebida', {
+              description: newMsg.content,
+              icon: <MessageCircle size={18} className="text-blue-500" />
+            });
+            fetchNotifications(); // Refresh list
+          }
+        )
+        .subscribe();
+
+      // Admin Audit Logs Realtime
+      let adminChannel = null;
+      if (role === 'admin' || role === 'gestor') {
+        adminChannel = supabase
+          .channel('realtime-audits')
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'audit_logs' },
+            (payload) => {
+              // New Audit Log
+              fetchNotifications();
+            }
+          )
+          .subscribe();
+      }
+
+      return () => {
+        supabase.removeChannel(channel);
+        if (adminChannel) supabase.removeChannel(adminChannel);
+      };
     }
   }, [user, showNotifications]);
 
@@ -186,12 +225,12 @@ export default function Layout() {
           <div className="flex items-center space-x-3">
             <img
               src={logoSistema}
-              alt="Logo SAGEP"
-              className="h-8 w-8 object-cover rounded-lg"
+              alt="Logo CPS"
+              className="w-8 h-8 object-contain"
             />
-            <div className="leading-tight">
-              <span className="text-lg font-bold block">SAGEP</span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-widest">Gov. Pará</span>
+            <div>
+              <span className="text-lg font-bold block">CPS</span>
+              <span className="text-[10px] text-slate-400 block -mt-1 tracking-wider">Gov. Pará</span>
             </div>
           </div>
         </div>
@@ -232,14 +271,14 @@ export default function Layout() {
       </aside>
 
       {/* ÁREA DE CONTEÚDO */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-900 relative transition-colors duration-300">
-        <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm transition-colors duration-300">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50/90 dark:bg-slate-900/90 relative transition-colors duration-300">
+        <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm transition-colors duration-300">
           <div>
-            <h1 className="text-xl font-bold text-slate-800 dark:text-white">SGPS - Sistema de Gestão</h1>
+            <h1 className="text-lg md:text-xl font-bold text-slate-800 dark:text-white truncate">SGPS - Sistema de Gestão</h1>
           </div>
 
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center gap-3 pl-1 pr-4 py-1.5 bg-white dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all group cursor-default">
+          <div className="flex items-center space-x-4 md:space-x-6">
+            <div className="hidden md:flex items-center gap-3 pl-1 pr-4 py-1.5 bg-white dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all group cursor-default">
               <div className="h-9 w-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-white dark:ring-slate-800">
                 {userName.substring(0, 2).toUpperCase()}
               </div>
@@ -259,7 +298,7 @@ export default function Layout() {
             {/* TEMA (DARK MODE) */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors rounded-full hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="p-2 text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
               title="Alternar Tema"
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -269,17 +308,17 @@ export default function Layout() {
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 relative transition-colors rounded-full hover:bg-slate-50 dark:hover:bg-slate-700"
+                className="p-2 text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 relative transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-800"></span>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-800 animate-pulse"></span>
                 )}
               </button>
 
               {/* Dropdown de Notificações */}
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50 animate-fadeIn origin-top-right">
+                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50 animate-fadeIn origin-top-right">
                   <div className="px-4 py-3 border-b border-slate-50 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
                     <span className="font-bold text-sm text-slate-700 dark:text-slate-200 flex items-center gap-2">
                       <Bell size={14} className="text-blue-500" /> Notificações Recentes
@@ -296,9 +335,9 @@ export default function Layout() {
                         <div
                           key={n.id}
                           onClick={() => handleNotificationClick(n)}
-                          className={`px-4 py-3 border-b border-slate-50 dark:border-slate-700 hover:bg-blue-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group flex gap-3`}
+                          className={`px-4 py-3 border-b border-slate-50 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group flex gap-3 ${n.unread ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
                         >
-                          <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${n.type === 'audit' ? 'bg-orange-400' : 'bg-blue-500'}`}></div>
+                          <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${n.type === 'audit' ? 'bg-orange-400' : 'bg-blue-500'}`}></div>
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start">
                               <p className="text-sm text-slate-700 dark:text-slate-300 font-bold leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
@@ -315,17 +354,23 @@ export default function Layout() {
                       ))
                     )}
                   </div>
-                  <div className="p-2 text-center bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer text-xs font-bold text-blue-600 dark:text-blue-400 transition-colors border-t border-slate-100 dark:border-slate-700">
-                    Ver todas as atividades
-                  </div>
+                  <Link
+                    to="/notificacoes"
+                    onClick={() => setShowNotifications(false)}
+                    className="block p-2 text-center bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer text-xs font-bold text-blue-600 dark:text-blue-400 transition-colors border-t border-slate-100 dark:border-slate-700"
+                  >
+                    Ver histórico completo
+                  </Link>
                 </div>
               )}
             </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 dark:bg-slate-900 custom-scrollbar">
-          <Outlet />
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+          <div className="max-w-[1600px] mx-auto w-full">
+            <Outlet />
+          </div>
         </div>
       </main>
 

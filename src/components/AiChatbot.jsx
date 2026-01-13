@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 export default function AiChatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { id: 1, sender: 'bot', text: 'Olá! Sou o Assistente Inteligente do SAGEP, potencializado pelo Google Gemini. Posso ajudar com inscrições, editais, vagas e dúvidas gerais.' }
+        { id: 1, sender: 'bot', text: 'Olá! Sou o Assistente Inteligente do CPS, potencializado pelo Google Gemini. Posso ajudar com inscrições, editais, vagas e dúvidas gerais.' }
     ]);
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -97,7 +97,7 @@ export default function AiChatbot() {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             const prompt = `
-Você é o Assistente Virtual do SAGEP (Sistema de Gestão de Processos Seletivos).
+Você é o Assistente Virtual do CPS (Sistema de Gestão de Processos Seletivos).
 Seu objetivo é ajudar candidatos e usuários com dúvidas sobre o sistema, vagas e editais.
 
 Use APENAS as informações de contexto abaixo para responder à pergunta do usuário.
@@ -134,7 +134,7 @@ ${text}
                         <div className="flex items-center gap-2">
                             <Bot size={20} />
                             <div>
-                                <h3 className="font-bold text-sm">SAGEP Assistant</h3>
+                                <h3 className="font-bold text-sm">CPS Assistant</h3>
                                 <p className="text-[10px] opacity-80">Online</p>
                             </div>
                         </div>

@@ -26,6 +26,7 @@ const Planejamento = React.lazy(() => import('./pages/Planejamento'));
 const Lotacao = React.lazy(() => import('./pages/Lotacao'));
 const UpdatePassword = React.lazy(() => import('./pages/UpdatePassword'));
 const AdminPerfis = React.lazy(() => import('./pages/AdminPerfis'));
+const Notifications = React.lazy(() => import('./pages/Notifications'));
 
 import TryBoundary from './components/TryBoundary';
 import NetworkStatus from './components/NetworkStatus';
@@ -58,6 +59,7 @@ export default function App() {
 
                   {/* --- NOVA ROTA DE VAGAS ESPECIAIS --- */}
                   <Route path="vagas-especiais" element={<VagasEspeciais />} />
+                  <Route path="notificacoes" element={<Notifications />} />
 
                   <Route path="admin/perfis" element={<AdminPerfis />} />
                   <Route element={<ProtectedRoute allowedRoles={['admin']} />}>

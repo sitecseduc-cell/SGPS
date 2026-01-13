@@ -1,9 +1,10 @@
 import { supabase } from '../lib/supabaseClient';
 
 export const fetchProcessos = async () => {
+    // Selecione apenas as colunas que aparecem na tabela/lista
     const { data, error } = await supabase
         .from('processos')
-        .select('*')
+        .select('id, titulo, status, data_inicio, data_fim, vagas_disponiveis') 
         .order('created_at', { ascending: false });
     if (error) throw error;
     return data;
