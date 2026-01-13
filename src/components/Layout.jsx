@@ -9,6 +9,7 @@ import AiChatbot from './AiChatbot';
 import InternalChat from './InternalChat';
 import AuditDetailsModal from './AuditDetailsModal';
 
+
 import {
   LayoutDashboard, Users, Layers, Bell, LogOut, Search,
   FileText, Map, AlertTriangle, FileSpreadsheet, Shield, BookOpen, CheckCircle,
@@ -223,14 +224,18 @@ export default function Layout() {
       <aside className="w-80 h-[96vh] my-[2vh] ml-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-3xl flex flex-col hidden md:flex shadow-2xl z-50 transition-all duration-300">
 
         {/* Logo Area */}
-        <div className="p-8 pb-4">
-          <div className="flex items-center space-x-4 mb-2">
-            <div className="w-10 h-10 bg-white/50 dark:bg-white/10 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
-              <img src={logoSistema} alt="Logo" className="w-6 h-6 object-contain" />
+        <div className="p-8 pb-4 flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white/50 dark:bg-white/10 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/10 shrink-0">
+              <img src={logoSistema} alt="Logo" className="w-8 h-8 object-contain" />
             </div>
-            <div>
-              <span className="text-xl font-bold block text-slate-800 dark:text-white tracking-tight">SGPS</span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 block -mt-1 tracking-widest uppercase font-semibold">Gov. Pará</span>
+            <div className="flex flex-col justify-center">
+              <span className="text-lg font-bold text-slate-800 dark:text-white leading-tight tracking-tight">
+                CPS <span className="text-indigo-600 dark:text-indigo-400">Gestão</span>
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                Gov. Pará
+              </span>
             </div>
           </div>
         </div>
@@ -286,7 +291,9 @@ export default function Layout() {
             </h1>
           </div>
 
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4 md:space-x-6">
+
+
 
             {/* User Profile Pill */}
             <div className="hidden md:flex items-center gap-3 pl-1 pr-4 py-1.5 bg-white/60 dark:bg-black/20 rounded-full border border-white/50 dark:border-white/10 shadow-sm backdrop-blur-sm cursor-default hover:bg-white/80 transition-colors">
@@ -380,7 +387,9 @@ export default function Layout() {
         {/* Scrollable Main View */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:px-8 pb-20 custom-scrollbar scroll-smooth">
           <div className="max-w-[1600px] mx-auto w-full animate-fadeIn">
-            <Outlet />
+            <div key={useLocation().pathname} className="animate-page-transition w-full h-full">
+              <Outlet />
+            </div>
           </div>
         </div>
       </main>

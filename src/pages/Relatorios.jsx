@@ -9,7 +9,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell
 } from 'recharts';
-import ImmersiveLoader from '../components/ImmersiveLoader';
+import TableSkeleton from '../components/TableSkeleton';
 
 export default function Relatorios() {
     const [loading, setLoading] = useState(false);
@@ -120,7 +120,11 @@ export default function Relatorios() {
 
     return (
         <div className="space-y-8 animate-fadeIn pb-20">
-            {loading && <ImmersiveLoader />}
+            {loading && (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
+                    <TableSkeleton rows={3} cols={4} />
+                </div>
+            )}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-3xl font-bold text-slate-800">Central de Relatórios</h2>

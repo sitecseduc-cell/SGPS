@@ -12,7 +12,7 @@ import {
     Inbox
 } from 'lucide-react';
 import { toast } from 'sonner';
-import ImmersiveLoader from '../components/ImmersiveLoader';
+
 
 export default function Notifications() {
     const { user, role } = useAuth();
@@ -170,7 +170,17 @@ export default function Notifications() {
             {/* List */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden min-h-[400px]">
                 {loading ? (
-                    <ImmersiveLoader />
+                    <div className="p-6 space-y-4 animate-pulse">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="flex gap-4">
+                                <div className="h-10 w-10 bg-slate-200 rounded-full"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 w-1/3 bg-slate-200 rounded"></div>
+                                    <div className="h-4 w-3/4 bg-slate-100 rounded"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 ) : filteredNotifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-slate-400 gap-4">
                         <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700/50 rounded-full flex items-center justify-center">

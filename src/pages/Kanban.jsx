@@ -5,7 +5,7 @@ import KanbanCard from '../components/KanbanCard';
 import { supabase } from '../lib/supabaseClient';
 import { useLocation } from 'react-router-dom';
 import { Loader } from 'lucide-react';
-import ImmersiveLoader from '../components/ImmersiveLoader';
+
 
 const INITIAL_COLUMNS = {
   aguardando_envio: [],
@@ -154,7 +154,15 @@ export default function Kanban() {
       </div>
 
       {loading ? (
-        <ImmersiveLoader />
+        <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar h-full">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="min-w-[320px] bg-slate-100/50 rounded-xl p-4 animate-pulse flex flex-col gap-4">
+              <div className="h-6 w-1/2 bg-slate-200 rounded"></div>
+              <div className="h-24 w-full bg-white rounded-lg"></div>
+              <div className="h-24 w-full bg-white rounded-lg"></div>
+            </div>
+          ))}
+        </div>
       ) : (
         <DndContext collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex-1 flex overflow-x-auto pb-4 custom-scrollbar">

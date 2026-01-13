@@ -17,8 +17,9 @@ import {
 import StatCard from '../components/StatCard';
 import FunnelChart from '../components/FunnelChart';
 import CardSkeleton from '../components/CardSkeleton';
+import HeroSkeleton from '../components/HeroSkeleton';
+import ChartSkeleton from '../components/ChartSkeleton';
 import OnboardingTour from '../components/OnboardingTour';
-import ImmersiveLoader from '../components/ImmersiveLoader';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -62,51 +63,55 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  if (loading) {
-    return <ImmersiveLoader />;
-  }
+  // Removed full screen loader to allow skeleton UI
+  // if (loading) return <ImmersiveLoader />;
 
   return (
     <div className="space-y-8 animate-fadeIn pb-10">
 
       {/* Hero Welcome Section */}
-      <div className="relative overflow-hidden rounded-3xl p-8 md:p-12 shadow-2xl">
-        {/* Animated Background Mesh */}
-        <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600"></div>
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+      {/* Hero Welcome Section */}
+      {loading ? (
+        <HeroSkeleton />
+      ) : (
+        <div className="relative overflow-hidden rounded-3xl p-8 md:p-12 shadow-2xl">
+          {/* Animated Background Mesh */}
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600"></div>
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
 
-        {/* Abstract decoration */}
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-fuchsia-500/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
+          {/* Abstract decoration */}
+          <div className="absolute -right-20 -top-20 w-96 h-96 bg-fuchsia-500/30 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
 
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-semibold mb-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Sistema Operacional
-            </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
-              Bem-vindo à <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">CPS</span>
-            </h1>
-            <p className="text-indigo-100/80 text-lg max-w-xl leading-relaxed font-light">
-              Painel de gestão inteligente para processos seletivos.
-              Acompanhe métricas, gerencie editais e controle convocações em um único lugar.
-            </p>
-          </div>
-
-          <div className="hidden lg:block">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex items-center gap-4">
-              <div className="bg-white/20 p-3 rounded-xl text-white">
-                <Activity size={24} />
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-semibold mb-4">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Sistema Operacional
               </div>
-              <div>
-                <p className="text-white/60 text-xs uppercase font-bold">Status do Servidor</p>
-                <p className="text-white font-bold">Online & Estável</p>
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
+                Bem-vindo à <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">CPS</span>
+              </h1>
+              <p className="text-indigo-100/80 text-lg max-w-xl leading-relaxed font-light">
+                Painel de gestão inteligente para processos seletivos.
+                Acompanhe métricas, gerencie editais e controle convocações em um único lugar.
+              </p>
+            </div>
+
+            <div className="hidden lg:block">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-xl text-white">
+                  <Activity size={24} />
+                </div>
+                <div>
+                  <p className="text-white/60 text-xs uppercase font-bold">Status do Servidor</p>
+                  <p className="text-white font-bold">Online & Estável</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* KPI Stats Grid */}
       <div id="kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -150,24 +155,29 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Funnel Chart Section */}
-        <div className="lg:col-span-2 glass-card p-8 border border-white/40 dark:border-white/5">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                <TrendingUp size={20} className="text-indigo-500" />
-                Funil de Seleção
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Visão geral do fluxo de candidatos</p>
+        {/* Funnel Chart Section */}
+        {loading ? (
+          <ChartSkeleton />
+        ) : (
+          <div className="lg:col-span-2 glass-card p-8 border border-white/40 dark:border-white/5">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <TrendingUp size={20} className="text-indigo-500" />
+                  Funil de Seleção
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Visão geral do fluxo de candidatos</p>
+              </div>
+              <button className="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+                Ver Detalhes
+              </button>
             </div>
-            <button className="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
-              Ver Detalhes
-            </button>
-          </div>
 
-          <div className="h-[300px] w-full flex items-center justify-center">
-            <FunnelChart loading={loading} data={funnelData} />
+            <div className="h-[300px] w-full flex items-center justify-center">
+              <FunnelChart loading={loading} data={funnelData} />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Quick Actions Panel */}
         <div id="quick-actions" className="lg:col-span-1">

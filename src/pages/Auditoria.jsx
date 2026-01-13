@@ -68,7 +68,7 @@ export default function Auditoria() {
         doc.setFont("helvetica", "bold");
         doc.text("ESTADO DO PARÁ", 105, 15, { align: "center" });
         doc.text("SECRETARIA DE GESTÃO E PLANEJAMENTO", 105, 20, { align: "center" });
-        doc.text("SISTEMA DE GESTÃO DE PROCESSO SELETIVO - SGPS", 105, 25, { align: "center" });
+        doc.text("CPS - SISTEMA DE GESTÃO", 105, 25, { align: "center" });
 
         doc.setLineWidth(0.5);
         doc.line(20, 30, 190, 30);
@@ -117,7 +117,7 @@ export default function Auditoria() {
             doc.setPage(i);
             doc.setFontSize(8);
             doc.text(`Página ${i} de ${pageCount}`, 190, 285, { align: "right" });
-            doc.text("Documento gerado eletronicamente pelo sistema oficial SGPS/CPS.", 105, 285, { align: "center" });
+            doc.text("Documento gerado eletronicamente pelo sistema oficial CPS.", 105, 285, { align: "center" });
             doc.text("IOEPA - Imprensa Oficial do Estado", 20, 285, { align: "left" });
         }
 

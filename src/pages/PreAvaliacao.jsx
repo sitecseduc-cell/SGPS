@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 import { CheckCircle, XCircle, FileText, AlertCircle, Loader2 } from 'lucide-react';
-import ImmersiveLoader from '../components/ImmersiveLoader';
+
 
 export default function PreAvaliacao() {
     const [candidatos, setCandidatos] = useState([]);
@@ -53,7 +53,23 @@ export default function PreAvaliacao() {
         }
     };
 
-    if (loading) return <ImmersiveLoader />;
+    if (loading) {
+        return (
+            <div className="space-y-6 animate-fadeIn pb-20">
+                <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div className="space-y-2">
+                        <div className="h-8 w-64 bg-slate-200 rounded"></div>
+                        <div className="h-4 w-48 bg-slate-100 rounded"></div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-32 animate-pulse"></div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 animate-fadeIn pb-20">

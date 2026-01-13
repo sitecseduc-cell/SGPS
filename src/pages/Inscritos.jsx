@@ -4,10 +4,10 @@ import {
   User, MapPin, FileText, Clock, FileCheck, Eye,
   Shield, CheckCircle, X, AlertTriangle, Loader, Plus
 } from 'lucide-react';
-import ImmersiveLoader from '../components/ImmersiveLoader';
+import TableSkeleton from '../components/TableSkeleton';
 import CandidateTable from '../components/CandidateTable';
 import NewCandidateModal from '../components/NewCandidateModal';
-import { TableSkeleton, Spinner } from '../components/ui/Loading';
+import { Spinner } from '../components/ui/Loading';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 
@@ -245,7 +245,9 @@ export default function Inscritos() {
         </div>
         <div className="flex-1 overflow-hidden flex flex-col">
           {loading ? (
-            <ImmersiveLoader />
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+              <TableSkeleton rows={10} cols={6} />
+            </div>
           ) : (
             <CandidateTable
               candidates={filteredData}

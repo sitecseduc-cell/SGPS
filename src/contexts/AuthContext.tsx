@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import logoSistema from '../assets/brassao.svg';
 import { User } from '@supabase/supabase-js';
+import ImmersiveLoader from '../components/ImmersiveLoader';
 
 // Define types for Profile and Context
 type Profile = {
@@ -220,14 +221,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isManager = role === 'gestor' || role === 'admin';
 
   if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-          <img src={logoSistema} alt="Carregando..." className="h-10 w-auto" />
-        </div>
-      </div>
-    );
+    return <ImmersiveLoader />;
   }
 
   const refreshProfile = async () => {

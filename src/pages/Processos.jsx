@@ -188,7 +188,9 @@ export default function Processos() {
       </div>
       {/* Tabela */}
       {loading ? (
-        <ImmersiveLoader />
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+          <TableSkeleton rows={5} cols={5} />
+        </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">

@@ -427,7 +427,28 @@ export default function AdminPerfis() {
     );
 
     if (loading) {
-        return <ImmersiveLoader />;
+        if (loading) {
+            return (
+                <div className="space-y-8 animate-fadeIn pb-20">
+                    {/* Header Skeleton */}
+                    <div className="flex justify-between items-center">
+                        <div className="space-y-2">
+                            <div className="h-8 w-48 bg-slate-200 rounded animate-pulse"></div>
+                            <div className="h-4 w-64 bg-slate-100 rounded animate-pulse"></div>
+                        </div>
+                        <div className="h-10 w-24 bg-slate-200 rounded animate-pulse"></div>
+                    </div>
+                    {/* Tabs Skeleton */}
+                    <div className="flex gap-2">
+                        {[1, 2, 3, 4].map(i => <div key={i} className="h-10 w-32 bg-slate-100 rounded-lg animate-pulse"></div>)}
+                    </div>
+                    {/* Content Skeleton */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[1, 2, 3].map(i => <div key={i} className="h-64 bg-slate-50 rounded-2xl animate-pulse border border-slate-100"></div>)}
+                    </div>
+                </div>
+            );
+        }
     }
 
     return (

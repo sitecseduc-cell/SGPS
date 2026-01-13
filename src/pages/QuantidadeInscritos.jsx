@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import ImmersiveLoader from '../components/ImmersiveLoader';
+
 import { Users, Briefcase, MapPin, PieChart } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
@@ -50,7 +50,18 @@ export default function QuantidadeInscritos() {
         }
     };
 
-    if (loading) return <ImmersiveLoader />;
+    if (loading) {
+        return (
+            <div className="space-y-8 animate-fadeIn pb-20">
+                <div className="h-10 w-64 bg-slate-200 rounded animate-pulse"></div>
+                <div className="bg-slate-200 rounded-3xl h-48 w-full animate-pulse"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="h-64 bg-slate-100 rounded-2xl animate-pulse"></div>
+                    <div className="h-64 bg-slate-100 rounded-2xl animate-pulse"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-fadeIn pb-20">
