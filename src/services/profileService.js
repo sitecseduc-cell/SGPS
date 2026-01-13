@@ -135,12 +135,12 @@ export const profileService = {
 
   async getUsers() {
     // Busca perfis da tabela pública 'profiles'
-    // Limitando a 100 para evitar lentidão (TODO: Implementar paginação real)
+    // Limitando a 50 para evitar lentidão (TODO: Implementar paginação real)
     const { data, error } = await supabase
       .from('profiles')
       .select('id, full_name, email, role, updated_at')
       .order('full_name') // Ordenação alfabética
-      .limit(100);
+      .limit(50); // Reduzido temporariamente para destravar
 
     if (error) throw error;
 

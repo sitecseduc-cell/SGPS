@@ -1,11 +1,18 @@
 import { supabase } from '../lib/supabaseClient';
 
-export const fetchProcessos = async () => {
+export const fetchProcessos = async ({ signal } = {}) => {
     // Selecione apenas as colunas que aparecem na tabela/lista
-    const { data, error } = await supabase
+    let query = supabase
         .from('processos')
-        .select('id, titulo, status, data_inicio, data_fim, vagas_disponiveis') 
-        .order('created_at', { ascending: false });
+        .select('id, titulo, status, data_inicio, data_fim, vagas_disponiveis')
+        .order('created_at', { ascending: false })
+        .limit(50); // Hard limit preventivo
+
+    if (signal) {
+        query = query.abortSignal(signal);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data;
 };

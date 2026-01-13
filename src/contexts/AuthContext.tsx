@@ -62,39 +62,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }, 6000)
       );
 
-      // The actual supabase query
-      const queryPromise = supabase
+      // ⚠️ CÓDIGO ANTIGO (Lento / Timeout)
+      /* const queryPromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .abortSignal(abortController.signal)
         .single();
+      */
+
+      // ✅ CÓDIGO NOVO (Instantâneo via RPC)
+      // Usamos 'maybeSingle' para evitar erro se o perfil ainda não existir
+      const queryPromise = supabase
+        .rpc('get_my_profile')
+        .abortSignal(abortController.signal);
 
       // Race them
       const result: any = await Promise.race([queryPromise, timeoutPromise]);
 
+      // O RPC retorna os dados diretamente em 'data', ou null
+      // Ajuste para manter compatibilidade com o formato esperado
       const { data, error } = result;
 
       if (error) {
-        if (error.code !== 'PGRST116') { // Ignore "Row not found" errors in console
-          console.error(`[Auth] ❌ Error fetching profile:`, error);
-        }
-
-        // Distinguish between "not found" and other errors
-        if (error.code === 'PGRST116') {
-          console.warn('[Auth] ⚠️ Profile not found in database - user may need to complete registration');
-        } else {
-          console.error('[Auth] ❌ Database error - check RLS policies and table permissions');
-        }
-
+        console.error('[Auth] ❌ Error fetching profile via RPC:', error);
         setProfile(null);
         return;
       }
 
+      // Se data for null, significa que não achou (equivalente ao erro PGRST116)
       if (data) {
         setProfile(data);
       } else {
-        console.warn('[Auth] ⚠️ No profile data returned');
+        console.warn('[Auth] ⚠️ Perfil não encontrado para este usuário.');
         setProfile(null);
       }
     } catch (err: any) {
