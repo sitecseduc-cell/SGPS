@@ -93,9 +93,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Se data for null, significa que não achou (equivalente ao erro PGRST116)
       if (data) {
+        // console.log('[Auth] ✅ Perfil carregado:', data);
         setProfile(data);
       } else {
-        console.warn('[Auth] ⚠️ Perfil não encontrado para este usuário.');
+        console.warn('[Auth] ⚠️ Perfil não encontrado para este usuário. (Data null)');
         setProfile(null);
       }
     } catch (err: any) {
