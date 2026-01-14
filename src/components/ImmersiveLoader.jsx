@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Hexagon } from 'lucide-react';
 
 const MESSAGES = [
     "Sincronizando threads assíncronas...",
@@ -46,34 +47,33 @@ export default function ImmersiveLoader() {
             {/* Main Loader Container */}
             <div className="relative z-10 flex flex-col items-center">
 
-                {/* Animated Star (Pará Reference) */}
+                {/* Animated Logo (Professional Icon) */}
                 <div className="relative w-40 h-40 mb-12 flex items-center justify-center">
                     {/* Pulsing Outer Glow */}
-                    <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
 
-                    {/* Rotating Ring (Stylized) */}
-                    <div className="absolute inset-0 border-2 border-red-500/30 rounded-full animate-[spin_8s_linear_infinite]"></div>
-                    <div className="absolute inset-4 border-2 border-white/20 rounded-full animate-[spin_6s_linear_infinite_reverse]"></div>
+                    {/* Rotating Rings */}
+                    <div className="absolute inset-0 border border-slate-200 dark:border-slate-700/50 rounded-full animate-[spin_10s_linear_infinite]"></div>
+                    <div className="absolute inset-4 border border-slate-300 dark:border-slate-600/30 rounded-full animate-[spin_8s_linear_infinite_reverse]"></div>
 
-                    {/* The Star */}
-                    <div className="relative z-10 animate-float">
-                        <svg viewBox="0 0 24 24" className="w-24 h-24 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-                            <defs>
-                                <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#ef4444" /> {/* Red-500 */}
-                                    <stop offset="100%" stopColor="#b91c1c" /> {/* Red-700 */}
-                                </linearGradient>
-                            </defs>
-                            {/* 5-Pointed Star Shape */}
-                            <path
-                                fill="url(#starGradient)"
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                                className="animate-[pulse_3s_ease-in-out_infinite]"
-                            />
-                        </svg>
+                    {/* Thin Progress Ring Effect */}
+                    <svg className="absolute inset-0 w-full h-full rotate-[-90deg] p-1">
+                        <circle
+                            cx="50%" cy="50%" r="48%"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            strokeDasharray="100 200"
+                            className="text-indigo-500/30 animate-[spin_3s_linear_infinite]"
+                        />
+                    </svg>
 
-                        {/* Inner white sparkle/core to represent the "Virgem" star aspect perhaps? */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full blur-md animate-ping"></div>
+                    {/* The Professional Icon */}
+                    <div className="relative z-10 animate-float flex flex-col items-center justify-center">
+                        <Hexagon
+                            strokeWidth={1.5}
+                            className="w-16 h-16 text-indigo-600 dark:text-indigo-400 drop-shadow-lg fill-indigo-500/5"
+                        />
                     </div>
                 </div>
 

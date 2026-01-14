@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import logoSistema from '../assets/brassao.svg';
-import { Lock, Mail, User, AlertCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Lock, Mail, User, AlertCircle, ArrowRight, ArrowLeft, Loader2, Hexagon } from 'lucide-react';
 import ImmersiveLoader from '../components/ImmersiveLoader';
 
 // --- VALIDATION AND FORMS ---
@@ -115,7 +114,7 @@ export default function Login() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex p-4 rounded-2xl bg-white/50 dark:bg-white/10 shadow-lg shadow-indigo-500/10 mb-6 group hover:scale-105 transition-all duration-300">
-            <img src={logoSistema} alt="Logo CPS" className="h-12 w-12 object-contain" />
+            <Hexagon className="h-12 w-12 text-indigo-600 dark:text-indigo-400 fill-indigo-500/10" />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-2">
             {header.title}

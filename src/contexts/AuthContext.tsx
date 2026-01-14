@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext, useRef, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import logoSistema from '../assets/brassao.svg';
+
 import { User } from '@supabase/supabase-js';
 import ImmersiveLoader from '../components/ImmersiveLoader';
 

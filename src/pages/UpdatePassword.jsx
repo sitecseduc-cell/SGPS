@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { Lock, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import logoSistema from '../assets/brassao.svg';
+import { Lock, Loader2, AlertCircle, CheckCircle, Hexagon } from 'lucide-react';
 
 export default function UpdatePassword() {
   const [password, setPassword] = useState('');
@@ -48,11 +47,9 @@ export default function UpdatePassword() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 p-8">
         <div className="text-center mb-8">
-          <img
-            src={logoSistema}
-            alt="Logo CPS"
-            className="h-16 w-16 object-cover mx-auto mb-4 rounded-lg"
-          />
+          <div className="flex justify-center mb-4">
+            <Hexagon className="h-16 w-16 text-indigo-600 fill-indigo-100" />
+          </div>
           <h1 className="text-2xl font-bold text-slate-800">Redefinir Senha</h1>
           <p className="text-slate-500 text-sm mt-2">Digite sua nova senha abaixo.</p>
         </div>

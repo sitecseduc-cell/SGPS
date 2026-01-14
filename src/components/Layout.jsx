@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabaseClient';
-import logoSistema from '../assets/brassao.svg';
+
 import AiChatbot from './AiChatbot';
 import InternalChat from './InternalChat';
 import AuditDetailsModal from './AuditDetailsModal';
@@ -14,7 +14,7 @@ import {
   LayoutDashboard, Users, Layers, Bell, LogOut, Search,
   FileText, Map, AlertTriangle, FileSpreadsheet, Shield, BookOpen, CheckCircle,
   KanbanSquare, Briefcase, ShieldAlert, Star, X, Sun, Moon, MessageCircle, Lock,
-  Menu
+  Menu, Hexagon
 } from 'lucide-react';
 
 // --- COMPONENTES AUXILIARES ---
@@ -227,7 +227,7 @@ export default function Layout() {
         <div className="p-8 pb-4 flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/50 dark:bg-white/10 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/10 shrink-0">
-              <img src={logoSistema} alt="Logo" className="w-8 h-8 object-contain" />
+              <Hexagon className="w-8 h-8 text-indigo-600 dark:text-indigo-400 fill-indigo-500/10" />
             </div>
             <div className="flex flex-col justify-center">
               <span className="text-lg font-bold text-slate-800 dark:text-white leading-tight tracking-tight">
