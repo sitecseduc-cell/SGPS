@@ -68,29 +68,19 @@ export default function Processos() {
     try {
       toast.info("Lendo arquivo PDF...");
       const text = await extractPdfText(file);
+      setPdfText(text);
 
-      toast.info("Analisando com IA (Gemini)...");
-      const dados = await GeminiService.analyzeEdital(text);
+      toast.info("Realizando Análise Profunda com IA...");
+      // Use the new Deep Analysis
+      const dados = await GeminiService.analyzeEditalDeep(text);
 
-      // Formata os dados extras na descrição
-      const cargosStr = dados.cargos?.length ? `\n\n📌 **Cargos Identificados:**\n- ${dados.cargos.join('\n- ')}` : '';
-      const etapasStr = dados.etapas?.length ? `\n\n📅 **Fases Previstas:**\n- ${dados.etapas.join('\n- ')}` : '';
-      const descriptionFull = (dados.descricao || '') + cargosStr + etapasStr;
+      setAnalysisResult(dados);
+      setIsAnalysisModalOpen(true);
 
-      // Preenche o formulário com os dados da IA
-      setEditingProcess({
-        isAiDraft: true, // Flag para indicar que é rascunho
-        nome: dados.nome,
-        descricao: descriptionFull,
-        inicio: dados.inicio,
-        fim: dados.fim
-      });
-      setIsModalOpen(true);
-
-      toast.success("Análise concluída! Verifique os dados.");
+      toast.success("Análise concluída!");
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao analisar arquivo: " + error.message);
+      toast.error("Erro ao analisar: " + error.message);
     } finally {
       setAnalyzing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -180,12 +170,10 @@ ${dados.sugestoes_ia?.join('\n- ') || ''}
 
   // Função Centralizada de Salvar (Cria ou Atualiza) via Service
   const handleSaveProcess = async (formData) => {
-    // Se tem ID, é update real. Se for rascunho de IA (sem ID), é criação.
-    if (editingProcess?.id) {
-      // --- MODO EDIÇÃO (UPDATE) ---
-      const { data, error } = await supabase
-        .from('processos')
-        .update({
+    try {
+      if (editingProcess?.id) {
+        // --- UPDATE ---
+        const updated = await updateProcesso(editingProcess.id, {
           nome: formData.nome,
           inicio: formData.inicio,
           fim: formData.fim,
