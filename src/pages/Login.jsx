@@ -229,15 +229,25 @@ export default function Login() {
           </button>
         </form>
 
+
         {/* Footer Navigation */}
-        <div className="mt-8 pt-6 border-t border-slate-200/60 dark:border-white/10 text-center">
+        <div className="mt-8 pt-6 border-t border-slate-200/60 dark:border-white/10 text-center space-y-4">
           {view === 'login' && (
-            <p className="text-slate-600 dark:text-slate-400 text-sm">
-              Ainda não tem conta?{' '}
-              <button onClick={() => changeView('register')} className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
-                Cadastre-se
-              </button>
-            </p>
+            <>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
+                Ainda não tem conta?{' '}
+                <button onClick={() => changeView('register')} className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+                  Cadastre-se
+                </button>
+              </p>
+
+              <div className="pt-2">
+                <button onClick={() => navigate('/consulta-publica')} className="text-xs font-semibold text-slate-500 hover:text-indigo-600 uppercase tracking-wider flex items-center justify-center gap-2 mx-auto transition-colors">
+                  <span className="p-1 rounded bg-slate-100 dark:bg-slate-800"><User size={12} /></span>
+                  Consultar Situação do Candidato
+                </button>
+              </div>
+            </>
           )}
           {view !== 'login' && (
             <button onClick={() => changeView('login')} className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white font-semibold flex items-center justify-center mx-auto gap-2 text-sm transition-colors">

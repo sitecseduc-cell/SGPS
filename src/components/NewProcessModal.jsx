@@ -12,16 +12,22 @@ export default function NewProcessModal({ isOpen, onClose, onSave, processoParaE
 
   useEffect(() => {
     if (isOpen) {
-      if (processoParaEditar) {
-        setFormData({
+      const initialData = processoParaEditar
+        ? {
           nome: processoParaEditar.nome || '',
           descricao: processoParaEditar.descricao || '',
           inicio: processoParaEditar.inicio || '',
           fim: processoParaEditar.fim || ''
-        });
-      } else {
-        setFormData({ nome: '', descricao: '', inicio: '', fim: '' });
-      }
+        }
+        : { nome: '', descricao: '', inicio: '', fim: '' };
+
+      // Only update if actually different to prevent loops if prop reference is unstable
+      setFormData(prev => {
+        if (JSON.stringify(prev) !== JSON.stringify(initialData)) {
+          return initialData;
+        }
+        return prev;
+      });
       setError('');
     }
   }, [isOpen, processoParaEditar]);

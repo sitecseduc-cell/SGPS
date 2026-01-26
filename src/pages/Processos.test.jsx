@@ -1,7 +1,29 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { BrowserRouter } from 'react-router-dom';
 import Processos from './Processos';
 import * as processosService from '../services/processos';
+
+// Mock dependencies
+vi.mock('pdfjs-dist', () => ({
+    GlobalWorkerOptions: {},
+    getDocument: vi.fn(() => ({
+        promise: Promise.resolve({
+            numPages: 1,
+            getPage: () => Promise.resolve({
+                getTextContent: () => Promise.resolve({ items: [{ str: 'test' }] }),
+                getViewport: () => ({ width: 100, height: 100 })
+            })
+        })
+    }))
+}));
+
+vi.mock('../services/GeminiService', () => ({
+    GeminiService: {
+        analyzeDocument: vi.fn(),
+        analyzeRecurso: vi.fn(),
+    }
+}));
 
 // Mock service
 vi.mock('../services/processos', () => ({
@@ -9,6 +31,27 @@ vi.mock('../services/processos', () => ({
     createProcesso: vi.fn(),
     updateProcesso: vi.fn(),
     deleteProcesso: vi.fn(),
+}));
+
+// Mock dependencies
+vi.mock('pdfjs-dist', () => ({
+    GlobalWorkerOptions: {},
+    getDocument: vi.fn(() => ({
+        promise: Promise.resolve({
+            numPages: 1,
+            getPage: () => Promise.resolve({
+                getTextContent: () => Promise.resolve({ items: [{ str: 'test' }] }),
+                getViewport: () => ({ width: 100, height: 100 })
+            })
+        })
+    }))
+}));
+
+vi.mock('../services/GeminiService', () => ({
+    GeminiService: {
+        analyzeDocument: vi.fn(),
+        analyzeRecurso: vi.fn(),
+    }
 }));
 
 describe('Processos Page', () => {
@@ -20,7 +63,11 @@ describe('Processos Page', () => {
         // Return empty list initially
         processosService.fetchProcessos.mockResolvedValue([]);
 
-        render(<Processos />);
+        render(
+            <BrowserRouter>
+                <Processos />
+            </BrowserRouter>
+        );
 
         expect(screen.getByText('Gerenciamento dos Processos')).toBeInTheDocument();
         expect(screen.getByText('Cadastrar Processo')).toBeInTheDocument();
@@ -34,7 +81,11 @@ describe('Processos Page', () => {
 
         processosService.fetchProcessos.mockResolvedValue(mockData);
 
-        render(<Processos />);
+        render(
+            <BrowserRouter>
+                <Processos />
+            </BrowserRouter>
+        );
 
         await waitFor(() => {
             expect(screen.getByText('Processo Seletivo 2025')).toBeInTheDocument();

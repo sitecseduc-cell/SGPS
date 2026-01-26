@@ -71,8 +71,17 @@ describe('Candidatos Service', () => {
 
         const result = await createCandidato(newCandidate);
 
+        const expectedInsert = {
+            nome: 'New User',
+            cpf: undefined,
+            email: undefined,
+            telefone: undefined,
+            cargo_pretendido: undefined,
+            status: 'Inscrito'
+        };
+
         expect(mockFrom).toHaveBeenCalledWith('candidatos');
-        expect(mockInsert).toHaveBeenCalledWith([newCandidate]);
+        expect(mockInsert).toHaveBeenCalledWith([expectedInsert]);
         expect(result).toEqual(createdCandidate);
     });
 

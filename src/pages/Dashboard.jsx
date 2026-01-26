@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
 import {
   Users,
@@ -11,11 +10,10 @@ import {
   ArrowRight,
   BookOpen,
   Map,
-  TrendingUp,
   Activity
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
-import FunnelChart from '../components/FunnelChart';
+import DashboardVisual from '../components/DashboardVisual';
 import CardSkeleton from '../components/CardSkeleton';
 import HeroSkeleton from '../components/HeroSkeleton';
 import ChartSkeleton from '../components/ChartSkeleton';
@@ -76,13 +74,9 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  // Removed full screen loader to allow skeleton UI
-  // if (loading) return <ImmersiveLoader />;
-
   return (
     <div className="space-y-8 animate-fadeIn pb-10">
 
-      {/* Hero Welcome Section */}
       {/* Hero Welcome Section */}
       {loading ? (
         <HeroSkeleton />
@@ -166,69 +160,49 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Funnel Chart Section */}
-        {/* Funnel Chart Section */}
-        {loading ? (
-          <ChartSkeleton />
-        ) : (
-          <div className="lg:col-span-2 glass-card p-8 border border-white/40 dark:border-white/5">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  <TrendingUp size={20} className="text-indigo-500" />
-                  Funil de Seleção
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Visão geral do fluxo de candidatos</p>
-              </div>
-              <button className="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
-                Ver Detalhes
-              </button>
-            </div>
+      {/* Visual Charts Section */}
+      {loading ? (
+        <ChartSkeleton />
+      ) : (
+        <DashboardVisual stats={stats} funnelData={funnelData} />
+      )}
 
-            <div className="h-[300px] w-full flex items-center justify-center">
-              <FunnelChart loading={loading} data={funnelData} />
-            </div>
+      {/* Quick Actions Panel */}
+      <div className="mt-8">
+        <div className="glass-card p-8 border border-white/40 dark:border-white/5">
+          <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">Acesso Rápido</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <QuickActionLink
+              to="/processos"
+              icon={Plus}
+              label="Novo Processo"
+              color="bg-indigo-500"
+              desc="Criar novo edital"
+            />
+            <QuickActionLink
+              to="/planejamento"
+              icon={BookOpen}
+              label="Configurar Vagas"
+              color="bg-violet-500"
+              desc="Mapa de vagas"
+            />
+            <QuickActionLink
+              to="/lotacao"
+              icon={Map}
+              label="Mapa de Lotação"
+              color="bg-emerald-500"
+              desc="Distribuir servidores"
+            />
           </div>
-        )}
 
-        {/* Quick Actions Panel */}
-        <div id="quick-actions" className="lg:col-span-1">
-          <div className="glass-card p-8 h-full border border-white/40 dark:border-white/5 flex flex-col">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">Acesso Rápido</h3>
-
-            <div className="space-y-4 flex-1">
-              <QuickActionLink
-                to="/processos"
-                icon={Plus}
-                label="Novo Processo"
-                color="bg-indigo-500"
-                desc="Criar novo edital"
-              />
-              <QuickActionLink
-                to="/planejamento"
-                icon={BookOpen}
-                label="Configurar Vagas"
-                color="bg-violet-500"
-                desc="Mapa de vagas"
-              />
-              <QuickActionLink
-                to="/lotacao"
-                icon={Map}
-                label="Mapa de Lotação"
-                color="bg-emerald-500"
-                desc="Distribuir servidores"
-              />
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/5">
-              <p className="text-xs text-slate-400 text-center">
-                Última atualização: {new Date().toLocaleTimeString()}
-              </p>
-            </div>
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5 text-center">
+            <p className="text-xs text-slate-400">
+              Última atualização: {new Date().toLocaleTimeString()}
+            </p>
           </div>
         </div>
       </div>
+
       <OnboardingTour />
     </div>
   );

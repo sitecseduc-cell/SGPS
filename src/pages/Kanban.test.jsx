@@ -1,58 +1,83 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import Kanban from './Kanban';
-import * as candidatosService from '../services/candidatos';
+import { MemoryRouter } from 'react-router-dom';
 
-// Mock service
-vi.mock('../services/candidatos', () => ({
-    fetchCandidatos: vi.fn(),
-    updateCandidatoStatus: vi.fn(),
-}));
+// Create mocks for Supabase chain
+const { mockFrom, mockSelect, mockOrder } = vi.hoisted(() => {
+    return {
+        mockFrom: vi.fn(),
+        mockSelect: vi.fn(),
+        mockOrder: vi.fn()
+    };
+});
 
-// Mock Supabase to avoid errors if used directly?
-// In Step 206, Kanban doesn't import supabase for operations, but it does import it maybe for 'kanban_cards' creation button?
-// Step 206: `<button onClick={async () => { await supabase.from('kanban_cards')...`
-// So we need to mock supabase too.
 vi.mock('../lib/supabaseClient', () => ({
     supabase: {
-        from: vi.fn(() => ({
-            insert: vi.fn(),
-        })),
+        from: mockFrom
     },
 }));
 
 describe('Kanban Page', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+
+        // Default chain setup
+        mockFrom.mockReturnValue({ select: mockSelect });
+        mockSelect.mockReturnThis(); // or create specific object if needed, usually .select().order()
+        // Wait, the component does .select('*').order(...)
+        // So .select must return an object with .order
+        mockSelect.mockReturnValue({ order: mockOrder });
     });
 
-    it('renders loading state initially', () => {
-        // Make fetchCandidatos return a never-resolving promise or just verify loading logic
-        candidatosService.fetchCandidatos.mockImplementation(() => new Promise(() => { }));
-        render(<Kanban />);
-        // Check for loading spinner or skeleton (assuming we removed Skeleton and used Spinner in previous edits? 
-        // Step 206 uses: <div className="animate-spin rounded-full ...">
-        const spinner = screen.getByText((content, element) => element.className.includes('animate-spin'));
-        expect(spinner).toBeInTheDocument();
+    it('renders loading state initially', async () => {
+        // Return a promise that never resolves to simulate loading
+        mockOrder.mockImplementation(() => new Promise(() => { }));
+
+        const { container } = render(
+            <MemoryRouter>
+                <Kanban />
+            </MemoryRouter>
+        );
+
+        // Check for loading spinner or skeleton
+        // The component renders a skeleton with class 'animate-pulse' when loading
+        expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
     });
 
     it('renders columns and cards after loading', async () => {
         const mockCandidates = [
             { id: 1, nome: 'João da Silva', created_at: '2025-12-01', status: 'Planejamento' },
-            { id: 2, nome: 'Maria Souza', created_at: '2025-12-02', status: 'Classificado' } // Maps to Homologacao
+            { id: 2, nome: 'Maria Souza', created_at: '2025-12-02', status: 'Homologado' }
         ];
 
-        candidatosService.fetchCandidatos.mockResolvedValue(mockCandidates);
+        // Ensure the chain resolves to data
+        mockOrder.mockResolvedValue({ data: mockCandidates, error: null });
 
-        render(<Kanban />);
+        render(
+            <MemoryRouter>
+                <Kanban />
+            </MemoryRouter>
+        );
 
+        // Wait for Loading to finish
+        // We expect 'Fluxo de Convocação' (h2) or column titles
         await waitFor(() => {
-            expect(screen.getByText('Fluxo de Trabalho')).toBeInTheDocument();
+            expect(screen.getByText('Fluxo de Convocação')).toBeInTheDocument();
         });
 
-        // Check column titles
-        expect(screen.getByText('Planejamento')).toBeInTheDocument();
-        expect(screen.getByText('Homologado')).toBeInTheDocument();
+        // Debug output if needed
+        // screen.debug();
+
+        // Check column titles (The component uses titles like "Classificados / Aguardando")
+        // "Planejamento" status typically maps to 'aguardando_envio' (if not found in map? Check logic)
+        // Logic: Object.keys(STATUS_MAP).find(...)
+        // 'Planejamento' is NOT in STATUS_MAP in the file I read.
+        // STATUS_MAP = { 'Classificado': ..., 'Em Análise': ..., 'Homologado': ... }
+        // The fallback is 'aguardando_envio'.
+
+        expect(screen.getByText('Classificados / Aguardando')).toBeInTheDocument();
+        expect(screen.getByText('Homologado / Contratado')).toBeInTheDocument();
 
         // Check card content
         expect(screen.getByText('João da Silva')).toBeInTheDocument();

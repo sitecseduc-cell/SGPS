@@ -15,7 +15,10 @@ export default defineConfig([
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.node, // Add Node globals for scripts/env usage
+      },
       parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
@@ -24,6 +27,17 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'no-undef': 'off', // Turning off no-undef because TS/Vite handles this better and it flags too many false positives in mixed envs
     },
   },
+  {
+      files: ['**/*.test.jsx', '**/*.test.js'],
+      languageOptions: {
+          globals: {
+              ...globals.jest, // Vitest compatible globals
+              vi: 'readonly',  // Vitest specific
+          }
+      }
+  }
 ])

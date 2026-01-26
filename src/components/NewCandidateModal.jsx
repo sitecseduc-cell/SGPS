@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, FileText, AlertCircle, Save, ToggleLeft, ToggleRight, PenTool } from 'lucide-react';
 import { planejamentoService } from '../services/planejamentoService';
+import { fetchProcessos } from '../services/processos';
 
 export default function NewCandidateModal({ isOpen, onClose, onSave }) {
     const [formData, setFormData] = useState({
@@ -8,16 +9,20 @@ export default function NewCandidateModal({ isOpen, onClose, onSave }) {
         cpf: '',
         email: '',
         telefone: '',
-        vaga: ''
+        vaga: '',
+        processo: ''
     });
     const [error, setError] = useState('');
     const [availableVagas, setAvailableVagas] = useState([]);
+    const [availableProcessos, setAvailableProcessos] = useState([]);
     const [isManualVaga, setIsManualVaga] = useState(false);
     const [loadingVagas, setLoadingVagas] = useState(false);
+    const [loadingProcessos, setLoadingProcessos] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
             fetchVagas();
+            loadProcessos();
         }
     }, [isOpen]);
 
@@ -33,6 +38,18 @@ export default function NewCandidateModal({ isOpen, onClose, onSave }) {
             // Fallback silencioso ou toast se necessário
         } finally {
             setLoadingVagas(false);
+        }
+    };
+
+    const loadProcessos = async () => {
+        try {
+            setLoadingProcessos(true);
+            const data = await fetchProcessos();
+            setAvailableProcessos(data || []);
+        } catch (error) {
+            console.error('Erro ao buscar processos:', error);
+        } finally {
+            setLoadingProcessos(false);
         }
     };
 
@@ -85,7 +102,7 @@ export default function NewCandidateModal({ isOpen, onClose, onSave }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!formData.nome || !formData.cpf || !formData.email || !formData.vaga) {
+        if (!formData.nome || !formData.cpf || !formData.email || !formData.vaga || !formData.processo) {
             setError('Preencha todos os campos obrigatórios.');
             return;
         }
@@ -97,7 +114,7 @@ export default function NewCandidateModal({ isOpen, onClose, onSave }) {
 
         onSave(formData);
         onClose();
-        setFormData({ nome: '', cpf: '', email: '', telefone: '', vaga: '' });
+        setFormData({ nome: '', cpf: '', email: '', telefone: '', vaga: '', processo: '' });
         setIsManualVaga(false);
     };
 
@@ -164,6 +181,26 @@ export default function NewCandidateModal({ isOpen, onClose, onSave }) {
                                     value={formData.email} onChange={handleChange}
                                 />
                             </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-500 uppercase">Processo Seletivo</label>
+                            <select
+                                name="processo"
+                                className="w-full pl-3 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none text-slate-600"
+                                value={formData.processo}
+                                onChange={handleChange}
+                                disabled={loadingProcessos}
+                            >
+                                <option value="">
+                                    {loadingProcessos ? 'Carregando processos...' : 'Selecione o Processo Seletivo...'}
+                                </option>
+                                {!loadingProcessos && availableProcessos.map((p) => (
+                                    <option key={p.id} value={p.titulo || p.nome || p.edital}>
+                                        {p.titulo || p.nome || `Edital ${p.edital}`}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="space-y-1.5">

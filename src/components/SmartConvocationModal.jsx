@@ -5,7 +5,6 @@ import { fetchCandidatos } from '../services/candidatos';
 import { toast } from 'sonner';
 
 export default function SmartConvocationModal({ isOpen, onClose, vacancies, onSuccess }) {
-    const [loading, setLoading] = useState(false);
     const [suggestions, setSuggestions] = useState(null);
     const [step, setStep] = useState('intro'); // intro, loading, results
 
@@ -13,7 +12,6 @@ export default function SmartConvocationModal({ isOpen, onClose, vacancies, onSu
 
     const handleStartAnalysis = async () => {
         setStep('loading');
-        setLoading(true);
         try {
             // 1. Fetch Candidates
             const allCandidates = await fetchCandidatos();
@@ -32,9 +30,13 @@ export default function SmartConvocationModal({ isOpen, onClose, vacancies, onSu
             console.error(error);
             toast.error("Erro na análise inteligente: " + error.message);
             setStep('intro');
-        } finally {
-            setLoading(false);
         }
+    };
+
+    const handleConfirm = () => {
+        toast.success("Convocação em massa iniciada!");
+        if (onSuccess) onSuccess();
+        onClose();
     };
 
     return (
@@ -59,7 +61,10 @@ export default function SmartConvocationModal({ isOpen, onClose, vacancies, onSu
 
                 {/* Content */}
                 <div className="p-8 overflow-y-auto flex-1">
-
+                    {/* ... (keep content safe, I will only replace the surrounding logic if I can, or replace specific blocks) ... */
+                        /* Actually, I need to be careful not to replace the whole file content if I can't see it all, but I saw it all. */
+                        /* I'll rewrite the component logic part and the footer */
+                    }
                     {step === 'intro' && (
                         <div className="text-center space-y-6 py-10">
                             <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mx-auto animate-pulse">
@@ -160,7 +165,7 @@ export default function SmartConvocationModal({ isOpen, onClose, vacancies, onSu
                         Fechar
                     </button>
                     {step === 'results' && (
-                        <button onClick={() => toast.success("Convocação em massa iniciada!")} className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all">
+                        <button onClick={handleConfirm} className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all">
                             Confirmar Todas
                         </button>
                     )}

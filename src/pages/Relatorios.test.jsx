@@ -1,6 +1,14 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import Relatorios from './Relatorios';
+
+vi.mock('recharts', async (importOriginal) => {
+    const original = await importOriginal();
+    return {
+        ...original,
+        ResponsiveContainer: ({ children }) => <div className="recharts-responsive-container" style={{ width: 800, height: 600 }}>{children}</div>,
+    };
+});
 
 // Mock Supabase
 const mockSelect = vi.fn();

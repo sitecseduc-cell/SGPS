@@ -42,13 +42,10 @@ describe('Processos Service', () => {
             delete: mockDelete,
         });
 
-        // Chain structure for fetch: from().select().order().limit()
-        const mockLimit = vi.fn().mockResolvedValue({ data: [], error: null });
+        // Chain structure for fetch: from().select().order()
         mockSelect.mockReturnValue({ order: mockOrder });
-        mockOrder.mockReturnValue({ limit: mockLimit });
-
-        const mockData = [{ id: 1, nome: 'Processo Test' }];
-        mockLimit.mockResolvedValue({ data: mockData, error: null });
+        // Return promise from order()
+        mockOrder.mockResolvedValue({ data: [{ id: 1, nome: 'Processo Test' }], error: null });
 
         // Chain structure for create: from().insert().select()
         mockInsert.mockReturnValue({ select: vi.fn().mockResolvedValue({ data: [{}], error: null }) });
@@ -64,16 +61,11 @@ describe('Processos Service', () => {
     });
 
     it('fetchProcessos should fetch all processes ordered by date', async () => {
-        const mockData = [{ id: 1, nome: 'Processo Test' }];
-        // Need to setup the specific return for this test if not covered by default or if overwritten
-        // Re-setup mockLimit behavior for this test context if needed, but it was set in beforeEach
-        // Just calling the function as the mocks are already set in beforeEach to return mockData
-
-        const result = await fetchProcessos();
+        await fetchProcessos();
 
         expect(mockFrom).toHaveBeenCalledWith('processos');
         // Match specific columns or strictly what is in code
-        expect(mockSelect).toHaveBeenCalledWith(expect.stringContaining('id, titulo'));
+        expect(mockSelect).toHaveBeenCalledWith('*');
         expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false });
         // mockLimit is local to beforeEach scope? No, I defined it inside beforeEach but not assigned to outer variable?
         // Wait, 'mockLimit' was defined inside beforeEach. I cannot access it here unless I define it outside.

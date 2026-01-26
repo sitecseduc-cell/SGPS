@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Layers, List, Edit3, Plus, Trash2, Save } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
-import ModalNovaVaga from '../components/ModalNovaVaga';
+import PlanningVacancyModal from '../components/PlanningVacancyModal';
 import ModalNovoCriterio from '../components/ModalNovoCriterio';
 
 export default function Planejamento() {
@@ -139,8 +139,9 @@ function ConfiguradorVagas() {
             </div>
 
             {showModal && (
-                <ModalNovaVaga
-                    initData={editingVaga}
+                <PlanningVacancyModal
+                    isOpen={showModal}
+                    initialData={editingVaga}
                     onClose={() => {
                         setShowModal(false);
                         setEditingVaga(null);

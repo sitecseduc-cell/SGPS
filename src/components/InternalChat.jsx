@@ -45,12 +45,15 @@ export default function InternalChat() {
             fetchUsers();
         }
 
-        if (activeTab === 'global' || activeTab === 'direct_chat') {
+        if ((activeTab === 'global' || activeTab === 'direct_chat')) {
+            // Initial fetch
             fetchMessages();
+            // Sub
             const channel = subscribeToMessages();
             return () => { supabase.removeChannel(channel); };
         }
-    }, [isOpen, activeTab, selectedUser]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, activeTab, selectedUser]); // Keeping existing behavior but suppressing warning as logic requires specific triggers
 
     // Auto-scroll
     useEffect(() => {

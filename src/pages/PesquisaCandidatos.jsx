@@ -131,7 +131,7 @@ export default function PesquisaCandidatos() {
                                         <FileText size={16} /> CPF: {candidato.cpf}
                                     </span>
                                     <span className="flex items-center gap-1">
-                                        <Briefcase size={16} /> {candidato.cargo || 'Cargo n/d'}
+                                        <Briefcase size={16} /> {candidato.cargo || candidato.vaga || 'Cargo n/d'}
                                     </span>
                                     <span className="flex items-center gap-1">
                                         <MapPin size={16} /> {candidato.localidade || 'Local n/d'}

@@ -513,11 +513,16 @@ const ModalProfile = ({ isOpen, onClose, onSave, editingProfile }) => {
     const [formData, setFormData] = useState({ id: '', name: '', description: '', color: 'bg-slate-100 text-slate-700 border-slate-200' });
 
     useEffect(() => {
-        if (editingProfile) {
-            setFormData(editingProfile);
-        } else {
-            setFormData({ id: '', name: '', description: '', color: 'bg-slate-100 text-slate-700 border-slate-200' });
-        }
+        const newData = editingProfile || { id: '', name: '', description: '', color: 'bg-slate-100 text-slate-700 border-slate-200' };
+
+        setFormData(prev => {
+            // Simple check to avoid updates if id matches and we assume stable objects during edit, 
+            // but deep check is safer for "editingProfile" which might be unstable ref.
+            if (prev.id === newData.id && prev.name === newData.name && prev.description === newData.description && prev.color === newData.color) {
+                return prev;
+            }
+            return newData;
+        });
     }, [editingProfile, isOpen]);
 
     if (!isOpen) return null;

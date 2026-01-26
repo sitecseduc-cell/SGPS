@@ -85,45 +85,6 @@ export default function Layout() {
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuário';
 
-  useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      // Realtime Subscriptions (Chat & Audit)
-      const channel = supabase
-        .channel('realtime-notifications')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `receiver_id=eq.${user.id}` },
-          (payload) => {
-            const newMsg = payload.new;
-            toast.info('Nova mensagem recebida', {
-              description: newMsg.content,
-              icon: <MessageCircle size={18} className="text-indigo-500" />
-            });
-            fetchNotifications();
-          }
-        )
-        .subscribe();
-
-      let adminChannel = null;
-      if (role === 'admin' || role === 'gestor') {
-        adminChannel = supabase
-          .channel('realtime-audits')
-          .on(
-            'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'audit_logs' },
-            (payload) => fetchNotifications()
-          )
-          .subscribe();
-      }
-
-      return () => {
-        supabase.removeChannel(channel);
-        if (adminChannel) supabase.removeChannel(adminChannel);
-      };
-    }
-  }, [user, showNotifications]);
-
   const fetchNotifications = async () => {
     if (!user) return;
     try {
@@ -179,6 +140,45 @@ export default function Layout() {
       console.error("Error fetching notifications", error);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      // Realtime Subscriptions (Chat & Audit)
+      const channel = supabase
+        .channel('realtime-notifications')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `receiver_id=eq.${user.id}` },
+          (payload) => {
+            const newMsg = payload.new;
+            toast.info('Nova mensagem recebida', {
+              description: newMsg.content,
+              icon: <MessageCircle size={18} className="text-indigo-500" />
+            });
+            fetchNotifications();
+          }
+        )
+        .subscribe();
+
+      let adminChannel = null;
+      if (role === 'admin' || role === 'gestor') {
+        adminChannel = supabase
+          .channel('realtime-audits')
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'audit_logs' },
+            (payload) => fetchNotifications()
+          )
+          .subscribe();
+      }
+
+      return () => {
+        supabase.removeChannel(channel);
+        if (adminChannel) supabase.removeChannel(adminChannel);
+      };
+    }
+  }, [user, showNotifications]);
 
   const handleLogout = async () => {
     try {

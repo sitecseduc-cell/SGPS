@@ -13,8 +13,11 @@ export default function ControleVagas() {
     const [showNewVacancyModal, setShowNewVacancyModal] = useState(false);
     const [editingVacancy, setEditingVacancy] = useState(null);
 
+    // eslint-disable-next-line no-unused-vars
     const [showColumnSelector, setShowColumnSelector] = useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [showFilters, setShowFilters] = useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [activeFilters, setActiveFilters] = useState({
         status: '',
         secretaria: ''

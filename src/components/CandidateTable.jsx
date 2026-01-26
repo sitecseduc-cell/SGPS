@@ -44,22 +44,21 @@ export default function CandidateTable({ candidates, onSelect, total, page, page
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-600 font-medium">{cand.processo}</td>
                 <td className="px-6 py-4 text-sm text-slate-600">
-                  <span className="block font-medium text-slate-800">{cand.cargo}</span>
+                  <span className="block font-medium text-slate-800">{cand.cargo || cand.vaga}</span>
                   <span className="text-xs text-slate-400 flex items-center mt-0.5">{cand.localidade}</span>
                 </td>
                 <td className="px-6 py-4 text-center">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                    cand.status === 'Classificado' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 
-                    cand.status === 'Desclassificado' ? 'bg-red-100 text-red-700 border-red-200' : 
-                    cand.status === 'Em Análise' ? 'bg-amber-100 text-amber-700 border-amber-200' :
-                    'bg-slate-100 text-slate-700 border-slate-200'
-                  }`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${cand.status === 'Classificado' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                      cand.status === 'Desclassificado' ? 'bg-red-100 text-red-700 border-red-200' :
+                        cand.status === 'Em Análise' ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                          'bg-slate-100 text-slate-700 border-slate-200'
+                    }`}>
                     {cand.status}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm opacity-80 group-hover:opacity-100">
-                    <Eye size={18}/>
+                    <Eye size={18} />
                   </button>
                 </td>
               </tr>
@@ -73,21 +72,21 @@ export default function CandidateTable({ candidates, onSelect, total, page, page
         <span className="text-sm text-slate-500">
           Mostrando <span className="font-bold text-slate-800">{startRange}</span> a <span className="font-bold text-slate-800">{endRange}</span> de <span className="font-bold text-slate-800">{total}</span> resultados
         </span>
-        
+
         <div className="flex items-center space-x-2">
-          <button 
+          <button
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
             className="p-2 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft size={18} />
           </button>
-          
+
           <span className="text-sm font-medium text-slate-700 px-2">
             Página {page} de {totalPages}
           </span>
 
-          <button 
+          <button
             onClick={() => onPageChange(page + 1)}
             disabled={page === totalPages}
             className="p-2 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

@@ -27,6 +27,7 @@ const Lotacao = React.lazy(() => import('./pages/Lotacao'));
 const UpdatePassword = React.lazy(() => import('./pages/UpdatePassword'));
 const AdminPerfis = React.lazy(() => import('./pages/AdminPerfis'));
 const Notifications = React.lazy(() => import('./pages/Notifications'));
+const PublicCandidateSearch = React.lazy(() => import('./pages/PublicCandidateSearch'));
 
 import TryBoundary from './components/TryBoundary';
 import NetworkStatus from './components/NetworkStatus';
@@ -45,6 +46,7 @@ export default function App() {
             <Routes>
 
               <Route path="/login" element={<Login />} />
+              <Route path="/consulta-publica" element={<PublicCandidateSearch />} />
               <Route path="/update-password" element={<UpdatePassword />} />
 
               <Route element={<ProtectedRoute />}>

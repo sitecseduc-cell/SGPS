@@ -71,18 +71,24 @@ export default function Inscritos() {
 
   const handleAddCandidate = async (newCandidate) => {
     try {
-      // CORREÇÃO AQUI: Extrair 'vaga' e usar como 'cargo'
-      const { vaga, ...restCandidate } = newCandidate;
+      const { vaga, cpf, telefone, ...restCandidate } = newCandidate;
+
+      // Clean masks
+      const cleanCpf = cpf.replace(/\D/g, '');
+      const cleanPhone = telefone ? telefone.replace(/\D/g, '') : '';
 
       const candidateToInsert = {
         ...restCandidate,
-        cargo: vaga, // Mapeamento correto
-        processo: 'Novo Processo Manual',
+        cpf: cleanCpf,
+        telefone: cleanPhone,
+        vaga: vaga,
+        processo: newCandidate.processo || 'Novo Processo Manual',
         localidade: 'A Definir',
-        status: 'Em Análise',
-        perfil: 'Manual',
-        documentos: [],
-        historico: [{ data: new Date().toLocaleDateString('pt-BR'), evento: 'Cadastro Manual', usuario: 'Admin' }]
+        status: 'EM ANÁLISE', // Standardized uppercase
+        // perfil: 'Manual',
+        // pontuacao: 0.0,
+        // documentos: [],
+        // historico: [{ data: new Date().toLocaleDateString('pt-BR'), evento: 'Cadastro Manual', usuario: 'Admin' }]
       };
 
       const { data, error } = await supabase
@@ -92,7 +98,6 @@ export default function Inscritos() {
 
       if (error) {
         console.error('Erro ao cadastrar candidato:', error);
-        toast.error('Erro ao cadastrar: ' + error.message);
         throw error;
       }
       if (data && data.length > 0) {
@@ -101,7 +106,8 @@ export default function Inscritos() {
       }
     } catch (e) {
       console.error(e);
-      toast.error('Ocorreu um erro inesperado.');
+      // Show actual error to help debugging schema issues
+      toast.error(`Erro: ${e.message || e.details || 'Falha ao cadastrar'}`);
     }
   };
 

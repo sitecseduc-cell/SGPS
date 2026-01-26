@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Tooltip, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import { Users, MapPin, CheckCircle, ArrowRight, Loader } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
@@ -96,8 +96,8 @@ export default function DashboardMap() {
                                 key={candidate.id}
                                 onClick={() => setSelectedCandidate(candidate)}
                                 className={`p-3 rounded-lg border cursor-pointer transition-all ${selectedCandidate?.id === candidate.id
-                                        ? 'bg-blue-50 border-blue-500 shadow-md ring-1 ring-blue-500'
-                                        : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-sm'
+                                    ? 'bg-blue-50 border-blue-500 shadow-md ring-1 ring-blue-500'
+                                    : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-sm'
                                     }`}
                             >
                                 <div className="flex justify-between items-start">
