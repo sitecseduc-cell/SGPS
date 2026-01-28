@@ -1,79 +1,74 @@
-# CPS (Sistema de Gestão de Processos Públicos)
+CPS - Sistema de Gestão de Processos Públicos
+O CPS é uma solução avançada para a gestão de processos de seleção pública e recrutamento, desenvolvida para modernizar e automatizar fluxos de trabalho administrativos. A plataforma integra ferramentas de inteligência artificial, análise de dados e um ecossistema completo para monitorização de candidatos, gestão de vagas e conformidade regulatória.
 
-Sistema moderno para gestão de processos seletivos, candidatos e vagas, desenvolvido com React, Vite e Supabase.
+🚀 Funcionalidades Principais
+Dashboard Executivo: Visualização em tempo real de estatísticas críticas, mapas de distribuição e métricas de desempenho dos processos.
 
-## 🚀 Começando
+Gestão de Candidatos (Kanban): Interface intuitiva para mover candidatos entre diferentes etapas do processo seletivo (Inscrição, Pré-Avaliação, Convocação, etc.).
 
-Siga estas instruções para configurar o projeto no seu ambiente local.
+Inteligência Artificial (Cortex AI): Chatbot integrado e motores de análise para auxílio na tomada de decisões e automação de respostas.
 
-### Pré-requisitos
+Algoritmo de Convocação Inteligente: Sistema automatizado para seleção e convocação de candidatos com base em critérios pré-definidos.
 
-*   Node.js (versão 18 ou superior recomendada)
-*   Conta no Supabase
+Controlo de Vagas e Lotação: Módulos específicos para planeamento de vagas e gestão da distribuição de pessoal em diferentes unidades.
 
-### 📥 Instalação
+Auditoria e Segurança: Registo detalhado de todas as ações no sistema e controlo rigoroso de perfis de acesso.
 
-1.  Clone o repositório (se aplicável).
-2.  Instale as dependências:
+Relatórios Personalizados: Geração de relatórios analíticos para avaliação de resultados e transparência pública.
 
-```bash
+🛠️ Tecnologias Utilizadas
+Frontend: React.js com Vite.
+
+Estilização: Tailwind CSS.
+
+Backend & Base de Dados: Supabase (PostgreSQL + RLS para segurança).
+
+Inteligência Artificial: Integração com Google Gemini API.
+
+Linguagens: JavaScript, TypeScript e scripts auxiliares em Python.
+
+📦 Estrutura do Projeto
+src/components/: Componentes de interface reutilizáveis (Modais, Tabelas, Cartões).
+
+src/pages/: Páginas principais do sistema (Dashboard, Kanban, Auditoria, Inscritos).
+
+src/services/: Integração com APIs externas e serviços do Supabase/Gemini.
+
+src/utils/: Lógica de negócio, como o algoritmo de convocação e validadores.
+
+scripts/: Ferramentas para migração de dados e depuração do sistema.
+
+🔧 Configuração e Instalação
+Pré-requisitos
+Node.js (versão LTS recomendada).
+
+Conta no Supabase com projeto configurado.
+
+Instalação
+Clone o repositório:
+
+Bash
+git clone https://github.com/usuario/cps-sistema-de-gestao.git
+Instale as dependências:
+
+Bash
 npm install
-```
+Configure as variáveis de ambiente num ficheiro .env (ex: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY).
 
-### 🔑 Configuração de Variáveis de Ambiente
+Inicie o servidor de desenvolvimento:
 
-Crie um arquivo `.env` na raiz do projeto (baseado no exemplo abaixo) e adicione suas credenciais do Supabase:
-
-```env
-VITE_SUPABASE_URL=sua_url_do_supabase
-VITE_SUPABASE_ANON_KEY=sua_chave_anonima_publica
-```
-
-> **Nota**: As chaves devem começar com `VITE_` para serem expostas ao frontend.
-
-### 🗄️ Configuração do Banco de Dados (Supabase)
-
-Para garantir o funcionamento correto de funções, índices de performance e segurança (RLS), você deve executar os scripts de migração no **SQL Editor** do seu painel Supabase.
-
-Execute os arquivos na seguinte ordem (localizados na raiz do projeto):
-
-1.  **`optimized_migration.sql`**: Cria as RPCs (`get_dashboard_stats`, `get_my_profile`) e índices de performance.
-2.  **`security_policies.sql`**: Habilita o RLS (Row Level Security) e define as políticas de acesso para `profiles`, `candidatos` e `processos`.
-
-### ⚡ Executando o Projeto
-
-Para iniciar o servidor de desenvolvimento:
-
-```bash
+Bash
 npm run dev
-```
+🧪 Testes e Qualidade
+O projeto utiliza Vitest para testes unitários e de performance.
 
-O sistema estará acessível em `http://localhost:3000` (ou porta indicada).
+Para correr os testes:
 
-### 🧪 Testes e Linting
+Bash
+npm test
+Para relatórios de linting:
 
-*   **Linting**: Para verificar o estilo de código:
-    ```bash
-    npm run lint
-    ```
-*   **Testes**: Para executar a suíte de testes (Vitest):
-    ```bash
-    npm test
-    ```
-
-### 📦 Build para Produção
-
-Para gerar a versão otimizada para deploy:
-
-```bash
-npm run build
-```
-
-Os arquivos estáticos serão gerados na pasta `dist`.
-
-## 🛠️ Tecnologias Utilizadas
-
-*   **Frontend**: React 19, Vite, Tailwind CSS, Lucide React, Recharts.
-*   **Backend / BaaS**: Supabase (Auth, Database, Realtime).
-*   **Mapas**: Leaflet.
-*   **PDF**: jsPDF.
+Bash
+npm run lint
+📄 Licença
+Este projeto é desenvolvido para uso interno da SEDUC. Verifique as permissões de acesso e direitos de autor antes da distribuição.
